@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>unitree_ros</name>
+    <version>0.0.0</version>
+    <description>Meta package that contains package of unitree_ros.</description>
+    <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
+
+    <license>BSD</license>
+
+    <url type="repository">https://github.com/unitree-ros/unitree_ros</url>
+    <url type="bugtracker">https://github.com/unitree-ros/unitree_ros/issues</url>
+
+    <author email="liaoqiayuan@gmail.com">Qiayuan Liao</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <export>
+        <metapackage/>
+    </export>
+</package>
