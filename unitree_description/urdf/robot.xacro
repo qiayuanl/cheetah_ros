@@ -40,7 +40,6 @@
             <geometry>
                 <mesh filename="package://unitree_description/meshes/$(arg robot_type)/trunk.dae" scale="1 1 1"/>
             </geometry>
-            <material name="orange"/>
         </visual>
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
