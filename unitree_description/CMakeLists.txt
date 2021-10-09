@@ -22,9 +22,3 @@ install(
         DIRECTORY meshes urdf
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
-
-# Mark other files for installation
-install(
-        DIRECTORY doc
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
