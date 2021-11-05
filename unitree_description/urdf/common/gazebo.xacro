@@ -8,24 +8,24 @@
         </plugin>
     </gazebo>
 
-    <!-- Show the trajectory of trunk center. -->
-    <gazebo>
-        <plugin name="3dplot" filename="libLinkPlot3DPlugin.so">
-            <frequency>10</frequency>
-            <plot>
-                <link>base</link>
-                <pose>0 0 0 0 0 0</pose>
-                <material>Gazebo/Yellow</material>
-            </plot>
-        </plugin>
-    </gazebo>
+    <!--    &lt;!&ndash; Show the trajectory of trunk center. &ndash;&gt;-->
+    <!--    <gazebo>-->
+    <!--        <plugin name="3dplot" filename="libLinkPlot3DPlugin.so">-->
+    <!--            <frequency>10</frequency>-->
+    <!--            <plot>-->
+    <!--                <link>base</link>-->
+    <!--                <pose>0 0 0 0 0 0</pose>-->
+    <!--                <material>Gazebo/Yellow</material>-->
+    <!--            </plot>-->
+    <!--        </plugin>-->
+    <!--    </gazebo>-->
 
-    <gazebo>
-        <plugin filename="libgazebo_ros_force.so" name="gazebo_ros_force">
-            <bodyName>trunk</bodyName>
-            <topicName>/apply_force/trunk</topicName>
-        </plugin>
-    </gazebo>
+    <!--    <gazebo>-->
+    <!--        <plugin filename="libgazebo_ros_force.so" name="gazebo_ros_force">-->
+    <!--            <bodyName>trunk</bodyName>-->
+    <!--            <topicName>/apply_force/trunk</topicName>-->
+    <!--        </plugin>-->
+    <!--    </gazebo>-->
 
     <!-- Foot contacts. -->
     <gazebo reference="FR_calf">

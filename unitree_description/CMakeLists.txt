@@ -19,6 +19,6 @@ catkin_package(
 
 # Mark resource files for installation
 install(
-        DIRECTORY meshes urdf
+        DIRECTORY meshes urdf launch
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
