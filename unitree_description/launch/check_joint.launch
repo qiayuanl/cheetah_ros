@@ -15,7 +15,4 @@
         <param name="publish_frequency" type="double" value="50.0"/>
     </node>
 
-    <node pkg="rviz" type="rviz" name="rviz" respawn="false" output="screen"
-          args="-d $(find unitree_description)/launch/check_joint.rviz"/>
-
 </launch>
