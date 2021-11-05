@@ -2,9 +2,9 @@
 <robot>
     <!-- ros_control plugin -->
     <gazebo>
-        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <plugin name="gazebo_ros_control" filename="libunitree_hw_sim.so">
             <robotNamespace>/</robotNamespace>
-            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+            <robotSimType>unitree_gazebo/UnitreeHWSim</robotSimType>
         </plugin>
     </gazebo>
 
