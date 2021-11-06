@@ -1,0 +1,10 @@
+<library path="lib/libunitree_control">
+
+    <class name="unitree_ros/LegsController" type="unitree_ros::LegsController"
+           base_class_type="controller_interface::ControllerBase">
+        <description>
+            The legs controller.
+        </description>
+    </class>
+
+</library>

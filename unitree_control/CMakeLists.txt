@@ -14,9 +14,19 @@ find_package(catkin REQUIRED
         COMPONENTS
         roscpp
         roslint
-        unitree_common
+        pluginlib
         controller_interface
+        realtime_tools
+        unitree_common
         )
+
+#find_package(Boost REQUIRED COMPONENTS
+#        system
+#        filesystem
+#        )
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(pinocchio REQUIRED pinocchio)
 
 catkin_package(
         INCLUDE_DIRS
@@ -26,23 +36,39 @@ catkin_package(
         CATKIN_DEPENDS
         roscpp
         roslint
-        unitree_common
+        pluginlib
         controller_interface
+        realtime_tools
+        unitree_common
         DEPENDS
+        #        Boost
 )
 
 ###########
 ## Build ##
 ###########
 
+set(FLAGS
+        ${pinocchio_CFLAGS_OTHER}
+        -Wno-ignored-attributes
+        -DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR
+        -DPINOCCHIO_URDFDOM_USE_STD_SHARED_PTR
+        )
+
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
+        #        ${Boost_INCLUDE_DIRS}
+        ${pinocchio_INCLUDE_DIRS}
+)
+
+link_directories(
+        ${pinocchio_LIBRARY_DIRS}
 )
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
-        src/control_base.cpp
+        src/legs_controllers.cpp
         )
 
 add_dependencies(${PROJECT_NAME}
@@ -50,7 +76,11 @@ add_dependencies(${PROJECT_NAME}
         )
 
 target_link_libraries(${PROJECT_NAME}
+        #        ${Boost_LIBRARIES}
         ${catkin_LIBRARIES}
+        ${pinocchio_LIBRARIES}
         )
+
+target_compile_options(${PROJECT_NAME} PUBLIC ${FLAGS})
 
 roslint_cpp()

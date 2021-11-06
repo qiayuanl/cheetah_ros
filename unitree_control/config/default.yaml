@@ -1,0 +1,3 @@
+controllers:
+  quad_controller_base:
+    type: unitree_ros/LegsController
