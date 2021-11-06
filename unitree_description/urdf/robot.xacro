@@ -15,26 +15,11 @@
         <joint name="base_static_joint" type="fixed">
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <parent link="world"/>
-            <child link="base"/>
+            <child link="base_link"/>
         </joint>
     </xacro:if>
 
-    <link name="base">
-        <visual>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <box size="0.001 0.001 0.001"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <joint name="floating_base" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <parent link="base"/>
-        <child link="trunk"/>
-    </joint>
-
-    <link name="trunk">
+    <link name="base_link">
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
