@@ -19,6 +19,7 @@
     <depend>gazebo_ros_control</depend>
 
     <exec_depend>unitree_description</exec_depend>
+    <exec_depend>xacro</exec_depend>
 
     <export>
         <gazebo_ros_control plugin="${prefix}/unitree_hw_sim_plugins.xml"/>
