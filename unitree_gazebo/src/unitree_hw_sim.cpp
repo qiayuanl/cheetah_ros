@@ -49,7 +49,12 @@ bool UnitreeHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   gazebo_ros_control::DefaultRobotHWSim::registerInterface(&hybrid_joint_interface_);
   std::vector<std::string> names = ej_interface_.getNames();
   for (const auto& name : names)
+  {
     hybrid_joint_datas_.push_back(HybridJointData{ .joint_ = ej_interface_.getHandle(name) });
+    auto back = hybrid_joint_datas_.back();
+    hybrid_joint_interface_.registerHandle(
+        HybridJointHandle(back.joint_, &back.pos_des_, &back.vel_des_, &back.kp_, &back.kd_, &back.ff_));
+  }
 
   // IMU interface
   gazebo_ros_control::DefaultRobotHWSim::registerInterface(&imu_sensor_interface_);
