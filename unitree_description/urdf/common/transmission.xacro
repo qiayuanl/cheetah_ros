@@ -4,36 +4,36 @@
 
     <xacro:macro name="leg_transmission" params="name">
 
-        <transmission name="${name}_hip_tran">
+        <transmission name="${prefix}_hip_tran">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${name}_hip_joint">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <joint name="${prefix}_hip_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
             </joint>
-            <actuator name="${name}_hip_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
+            <actuator name="${prefix}_hip_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
 
-        <transmission name="${name}_thigh_tran">
+        <transmission name="${prefix}_thigh_tran">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${name}_thigh_joint">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <joint name="${prefix}_thigh_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
             </joint>
-            <actuator name="${name}_thigh_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
+            <actuator name="${prefix}_thigh_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
 
-        <transmission name="${name}_calf_tran">
+        <transmission name="${prefix}_calf_tran">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="${name}_calf_joint">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <joint name="${prefix}_calf_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
             </joint>
-            <actuator name="${name}_calf_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
+            <actuator name="${prefix}_calf_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
 

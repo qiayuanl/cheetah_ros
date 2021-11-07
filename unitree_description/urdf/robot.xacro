@@ -42,19 +42,19 @@
         </inertial>
     </link>
 
-    <xacro:leg name="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
+    <xacro:leg prefix="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
         <origin rpy="0 0 0" xyz="${leg_offset_x} ${-leg_offset_y} 0"/>
     </xacro:leg>
 
-    <xacro:leg name="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True">
+    <xacro:leg prefix="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True">
         <origin rpy="0 0 0" xyz="${leg_offset_x} ${leg_offset_y} 0"/>
     </xacro:leg>
 
-    <xacro:leg name="RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False">
+    <xacro:leg prefix="RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False">
         <origin rpy="0 0 0" xyz="${-leg_offset_x} ${-leg_offset_y} 0"/>
     </xacro:leg>
 
-    <xacro:leg name="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False">
+    <xacro:leg prefix="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False">
         <origin rpy="0 0 0" xyz="${-leg_offset_x} ${leg_offset_y} 0"/>
     </xacro:leg>
 

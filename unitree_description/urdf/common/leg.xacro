@@ -4,12 +4,12 @@
 
     <xacro:include filename="$(find unitree_description)/urdf/common/transmission.xacro"/>
 
-    <xacro:macro name="leg" params="name mirror mirror_dae front_hind front_hind_dae *origin">
+    <xacro:macro name="leg" params="prefix mirror mirror_dae front_hind front_hind_dae *origin">
 
-        <joint name="${name}_hip_joint" type="revolute">
+        <joint name="${prefix}_hip_joint" type="revolute">
             <xacro:insert_block name="origin"/>
             <parent link="base_link"/>
-            <child link="${name}_hip"/>
+            <child link="${prefix}_hip"/>
             <axis xyz="1 0 0"/>
             <dynamics damping="${damping}" friction="${friction}"/>
             <xacro:if value="${(mirror_dae == True)}">
@@ -22,7 +22,7 @@
             </xacro:if>
         </joint>
 
-        <link name="${name}_hip">
+        <link name="${prefix}_hip">
             <visual>
                 <xacro:if value="${(mirror_dae == True) and (front_hind_dae == True)}">
                     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -57,14 +57,14 @@
             </inertial>
         </link>
 
-        <joint name="${name}_hip_fixed" type="fixed">
+        <joint name="${prefix}_hip_fixed" type="fixed">
             <origin rpy="0 0 0" xyz="0 ${(thigh_shoulder_length/2.0+hip_offset)*mirror} 0"/>
-            <parent link="${name}_hip"/>
-            <child link="${name}_thigh_shoulder"/>
+            <parent link="${prefix}_hip"/>
+            <child link="${prefix}_thigh_shoulder"/>
         </joint>
 
         <!-- this link is only for collision -->
-        <link name="${name}_thigh_shoulder">
+        <link name="${prefix}_thigh_shoulder">
             <collision>
                 <origin rpy="${pi/2.0} 0 0" xyz="0 0 0"/>
                 <geometry>
@@ -73,17 +73,17 @@
             </collision>
         </link>
 
-        <joint name="${name}_thigh_joint" type="revolute">
+        <joint name="${prefix}_thigh_joint" type="revolute">
             <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
-            <parent link="${name}_hip"/>
-            <child link="${name}_thigh"/>
+            <parent link="${prefix}_hip"/>
+            <child link="${prefix}_thigh"/>
             <axis xyz="0 1 0"/>
             <dynamics damping="${damping}" friction="${friction}"/>
             <limit effort="${thigh_torque_max}" velocity="${thigh_velocity_max}" lower="${thigh_min}"
                    upper="${thigh_max}"/>
         </joint>
 
-        <link name="${name}_thigh">
+        <link name="${prefix}_thigh">
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
@@ -114,16 +114,16 @@
             </inertial>
         </link>
 
-        <joint name="${name}_calf_joint" type="revolute">
+        <joint name="${prefix}_calf_joint" type="revolute">
             <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
-            <parent link="${name}_thigh"/>
-            <child link="${name}_calf"/>
+            <parent link="${prefix}_thigh"/>
+            <child link="${prefix}_calf"/>
             <axis xyz="0 1 0"/>
             <dynamics damping="${damping}" friction="${friction}"/>
             <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min}" upper="${calf_max}"/>
         </joint>
 
-        <link name="${name}_calf">
+        <link name="${prefix}_calf">
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
@@ -147,13 +147,13 @@
             </inertial>
         </link>
 
-        <joint name="${name}_foot_fixed" type="fixed">
+        <joint name="${prefix}_foot_fixed" type="fixed">
             <origin rpy="0 0 0" xyz="0 0 ${-(calf_length)}"/>
-            <parent link="${name}_calf"/>
-            <child link="${name}_foot"/>
+            <parent link="${prefix}_calf"/>
+            <child link="${prefix}_foot"/>
         </joint>
 
-        <link name="${name}_foot">
+        <link name="${prefix}_foot">
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
@@ -176,6 +176,6 @@
             </inertial>
         </link>
 
-        <xacro:leg_transmission name="${name}"/>
+        <xacro:leg_transmission name="${prefix}"/>
     </xacro:macro>
 </robot>
