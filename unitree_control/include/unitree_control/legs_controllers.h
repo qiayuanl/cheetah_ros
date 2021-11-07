@@ -11,6 +11,22 @@
 
 namespace unitree_ros
 {
+enum LegPrefix
+{
+  FL,
+  FF,
+  RL,
+  RR
+};
+
+const static std::string LEG_PREFIX[4] = { "FL", "FF", "RL", "RR" };
+
+struct LegData
+{
+  HybridJointHandle joints_[3];
+  Eigen::Vector3d foot_pos_, foot_vel_;
+};
+
 class LegsController : public controller_interface::MultiInterfaceController<HybridJointInterface>
 {
 public:
@@ -20,9 +36,11 @@ public:
   void update(const ros::Time& time, const ros::Duration& period) override;
 
 private:
-  std::shared_ptr<pinocchio::Model> model_;
-  std::shared_ptr<pinocchio::Data> data_;
-  std::vector<HybridJointHandle> joint_handles_;
+  void updateData();
+  std::shared_ptr<pinocchio::Model> pin_model_;
+  std::shared_ptr<pinocchio::Data> pin_data_;
+  LegData datas_[4];
+  ros::Time last_publish_;
 };
 
 };  // namespace unitree_ros

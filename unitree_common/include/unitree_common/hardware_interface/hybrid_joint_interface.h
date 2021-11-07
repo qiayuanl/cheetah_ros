@@ -73,27 +73,27 @@ public:
     setKp(kp);
     setKd(kd);
   }
-  double getPositionDesired(double cmd)
+  double getPositionDesired()
   {
     assert(pos_des_);
     return *pos_des_;
   }
-  double getVelocityDesired(double cmd)
+  double getVelocityDesired()
   {
     assert(vel_des_);
     return *vel_des_;
   }
-  double getKp(double cmd)
+  double getKp()
   {
     assert(kp_);
     return *kp_;
   }
-  double getKd(double cmd)
+  double getKd()
   {
     assert(kd_);
     return *kd_;
   }
-  double getFeedforward(double cmd)
+  double getFeedforward()
   {
     assert(ff_);
     return *ff_;
