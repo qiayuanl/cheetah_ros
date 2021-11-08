@@ -51,7 +51,7 @@ bool UnitreeHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   for (const auto& name : names)
   {
     hybrid_joint_datas_.push_back(HybridJointData{ .joint_ = ej_interface_.getHandle(name) });
-    auto back = hybrid_joint_datas_.back();
+    HybridJointData& back = hybrid_joint_datas_.back();
     hybrid_joint_interface_.registerHandle(
         HybridJointHandle(back.joint_, &back.pos_des_, &back.vel_des_, &back.kp_, &back.kd_, &back.ff_));
   }

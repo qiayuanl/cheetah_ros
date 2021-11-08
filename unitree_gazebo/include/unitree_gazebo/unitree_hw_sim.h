@@ -76,8 +76,8 @@ private:
 
   HybridJointInterface hybrid_joint_interface_;
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
-  std::vector<HybridJointData> hybrid_joint_datas_;
-  std::vector<ImuData> imu_datas_;
+  std::list<HybridJointData> hybrid_joint_datas_;
+  std::list<ImuData> imu_datas_;
 };
 
 }  // namespace unitree_ros
