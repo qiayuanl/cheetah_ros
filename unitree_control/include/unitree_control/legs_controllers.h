@@ -23,23 +23,33 @@ const static std::string LEG_PREFIX[4] = { "FL", "FR", "RL", "RR" };
 
 struct LegData
 {
-  HybridJointHandle joints_[3];
+  hardware_interface::JointStateHandle joints_[3];
   Eigen::Vector3d foot_pos_, foot_vel_;
 };
 
-class LegsController : public controller_interface::MultiInterfaceController<HybridJointInterface>
+struct LegCommand
+{
+  HybridJointHandle joints_[3];
+  Eigen::Vector3d foot_pos_des_, foot_vel_des_, ff_cartesian_;
+  Eigen::Matrix3d kp_cartesian_, kd_cartesian_;
+};
+
+class LegsController
+  : public controller_interface::MultiInterfaceController<HybridJointInterface, hardware_interface::JointStateInterface>
 {
 public:
   LegsController() = default;
   LegsController(std::shared_ptr<pinocchio::Model> model, std::shared_ptr<pinocchio::Data> data);
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
   void update(const ros::Time& time, const ros::Duration& period) override;
+  void updateData(const ros::Time& time, const ros::Duration& period);
+  void updateCommand(const ros::Time& time, const ros::Duration& period);
 
 private:
-  void updateData();
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
   LegData datas_[4];
+  LegCommand commands_[4];
 };
 
 };  // namespace unitree_ros
