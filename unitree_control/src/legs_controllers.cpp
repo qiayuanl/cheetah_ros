@@ -53,17 +53,18 @@ void LegsController::updateData()
   for (int leg = 0; leg < 4; ++leg)
     for (int joint = 0; joint < 3; ++joint)
     {
+      // Free-flyer joints have 6 degrees of freedom, but are represented by 7 scalars: the position of the basis center
+      // in the world frame, and the orientation of the basis in the world frame stored as a quaternion.
       q(7 + leg * 3 + joint) = datas_[leg].joints_[joint].getPosition();
       v(6 + leg * 3 + joint) = datas_[leg].joints_[joint].getVelocity();
     }
   pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
-  pinocchio::framesForwardKinematics(*pin_model_, *pin_data_, q);
-  pinocchio::computeJointJacobians(*pin_model_, *pin_data_, q);
-
-  if (last_publish_ + ros::Duration(0.5) < ros::Time::now())
+  for (int leg = 0; leg < 4; ++leg)
   {
-    last_publish_ = ros::Time::now();
-    std::cout << std::setprecision(2) << pin_data_->oMf[pin_model_->getFrameId("FR_foot")].translation() << std::endl;
+    pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
+    datas_[leg].foot_pos_ = pinocchio::updateFramePlacement(*pin_model_, *pin_data_, frame_id).translation();
+    datas_[leg].foot_vel_ =
+        pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::WORLD).linear();
   }
 }
 

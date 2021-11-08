@@ -14,12 +14,12 @@ namespace unitree_ros
 enum LegPrefix
 {
   FL,
-  FF,
+  FR,
   RL,
   RR
 };
 
-const static std::string LEG_PREFIX[4] = { "FL", "FF", "RL", "RR" };
+const static std::string LEG_PREFIX[4] = { "FL", "FR", "RL", "RR" };
 
 struct LegData
 {
@@ -40,7 +40,6 @@ private:
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
   LegData datas_[4];
-  ros::Time last_publish_;
 };
 
 };  // namespace unitree_ros
