@@ -56,6 +56,7 @@ void LegsController::update(const ros::Time& time, const ros::Duration& period)
 void LegsController::updateData(const ros::Time& time, const ros::Duration& period)
 {
   Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
+  //  v(0) = 2.0;
   for (int leg = 0; leg < 4; ++leg)
     for (int joint = 0; joint < 3; ++joint)
     {
@@ -72,7 +73,8 @@ void LegsController::updateData(const ros::Time& time, const ros::Duration& peri
     pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
     datas_[leg].foot_pos_ = pin_data_->oMf[frame_id].translation();
     datas_[leg].foot_vel_ =
-        pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::WORLD).linear();
+        pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED)
+            .linear();
   }
 }
 
@@ -86,13 +88,12 @@ void LegsController::updateCommand(const ros::Time& time, const ros::Duration& p
     foot_force += commands_[leg].kd_cartesian_ * (commands_[leg].foot_vel_des_ - datas_[leg].foot_vel_);
     Eigen::Matrix<double, 6, 18> jac;
     pinocchio::getFrameJacobian(*pin_model_, *pin_data_, pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot"),
-                                pinocchio::ReferenceFrame::WORLD, jac);
+                                pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, jac);
     Eigen::Matrix<double, 6, 1> wrench;
     wrench.head(3) = foot_force;
-    Eigen::Matrix<double, Eigen::Dynamic, 1> tau = jac.transpose() * wrench;
+    Eigen::Matrix<double, 18, 1> tau = jac.transpose() * wrench;
     for (int joint = 0; joint < 3; ++joint)
-      commands_[leg].joints_[joint].setFeedforward(commands_[leg].joints_[joint].getFeedforward() +
-                                                   tau(6 + leg * 3 + joint));
+      commands_[leg].joints_[joint].setFeedforward(tau(6 + leg * 3 + joint));
   }
 }
 
