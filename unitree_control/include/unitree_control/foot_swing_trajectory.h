@@ -41,7 +41,7 @@ public:
 
   /*!
    * Set the desired final position of the foot
-   * @param pf : the final foot posiiton
+   * @param pf : the final foot position
    */
   void setFinalPosition(Vec3<T> pf)
   {
@@ -57,7 +57,7 @@ public:
     height_ = h;
   }
 
-  void computeSwingTrajectoryBezier(T phase, T swingTime);
+  void computeSwingTrajectoryBezier(T phase, T swing_time);
 
   /*!
    * Get the foot position at the current point along the swing
