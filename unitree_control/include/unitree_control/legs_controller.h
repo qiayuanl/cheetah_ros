@@ -21,15 +21,18 @@ enum LegPrefix
 
 const static std::string LEG_PREFIX[4] = { "FL", "FR", "RL", "RR" };
 
+struct LegJoint
+{
+  HybridJointHandle joints_[3];
+};
+
 struct LegData
 {
-  hardware_interface::JointStateHandle joints_[3];
   Eigen::Vector3d foot_pos_, foot_vel_;
 };
 
 struct LegCommand
 {
-  HybridJointHandle joints_[3];
   Eigen::Vector3d foot_pos_des_, foot_vel_des_, ff_cartesian_;
   Eigen::Matrix3d kp_cartesian_, kd_cartesian_;
 };
@@ -44,10 +47,14 @@ public:
   void update(const ros::Time& time, const ros::Duration& period) override;
   void updateData(const ros::Time& time, const ros::Duration& period);
   void updateCommand(const ros::Time& time, const ros::Duration& period);
+  LegJoint& getLegJoint(LegPrefix leg);
+  const LegData& getData(LegPrefix leg);
+  void setCommand(LegPrefix leg, const LegCommand& command);
 
 private:
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
+  LegJoint leg_joints_[4];
   LegData datas_[4];
   LegCommand commands_[4];
 };

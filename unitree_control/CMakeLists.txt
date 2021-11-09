@@ -69,7 +69,7 @@ link_directories(
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
-        src/legs_controllers.cpp
+        src/legs_controller.cpp
         )
 
 add_dependencies(${PROJECT_NAME}

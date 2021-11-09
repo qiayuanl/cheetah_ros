@@ -6,12 +6,11 @@
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
 
 #include <urdf_parser/urdf_parser.h>
 #include <pluginlib/class_list_macros.hpp>
 
-#include "unitree_control/legs_controllers.h"
+#include "unitree_control/legs_controller.h"
 
 namespace unitree_ros
 {
@@ -35,15 +34,11 @@ bool LegsController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   }
   // Setup joint handles. Ignore id 0 (universe joint) and id 1 (root joint).
   ROS_ASSERT(pin_model_->njoints == 14);
-  hardware_interface::JointStateInterface* joint_state_interface =
-      robot_hw->get<hardware_interface::JointStateInterface>();
   HybridJointInterface* hybrid_joint_interface = robot_hw->get<HybridJointInterface>();
   for (int leg = 0; leg < 4; ++leg)
     for (int j = 0; j < 3; ++j)
-    {
-      datas_[leg].joints_[j] = joint_state_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
-      commands_[leg].joints_[j] = hybrid_joint_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
-    }
+      leg_joints_[leg].joints_[j] = hybrid_joint_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
+
   return true;
 }
 
@@ -62,8 +57,8 @@ void LegsController::updateData(const ros::Time& time, const ros::Duration& peri
     {
       // Free-flyer joints have 6 degrees of freedom, but are represented by 7 scalars: the position of the basis center
       // in the world frame, and the orientation of the basis in the world frame stored as a quaternion.
-      q(7 + leg * 3 + joint) = datas_[leg].joints_[joint].getPosition();
-      v(6 + leg * 3 + joint) = datas_[leg].joints_[joint].getVelocity();
+      q(7 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getPosition();
+      v(6 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getVelocity();
     }
   pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
   pinocchio::computeJointJacobians(*pin_model_, *pin_data_);
@@ -93,8 +88,23 @@ void LegsController::updateCommand(const ros::Time& time, const ros::Duration& p
     wrench.head(3) = foot_force;
     Eigen::Matrix<double, 18, 1> tau = jac.transpose() * wrench;
     for (int joint = 0; joint < 3; ++joint)
-      commands_[leg].joints_[joint].setFeedforward(tau(6 + leg * 3 + joint));
+      leg_joints_[leg].joints_[joint].setFeedforward(tau(6 + leg * 3 + joint));
   }
+}
+
+LegJoint& LegsController::getLegJoint(LegPrefix leg)
+{
+  return leg_joints_[leg];
+}
+
+const LegData& LegsController::getData(LegPrefix leg)
+{
+  return datas_[leg];
+}
+
+void LegsController::setCommand(LegPrefix leg, const LegCommand& command)
+{
+  commands_[leg] = command;
 }
 
 }  // namespace unitree_ros
