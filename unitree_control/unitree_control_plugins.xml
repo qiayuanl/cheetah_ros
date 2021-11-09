@@ -7,4 +7,10 @@
         </description>
     </class>
 
+    <class name="unitree_ros/FeetController" type="unitree_ros::FeetController"
+           base_class_type="controller_interface::ControllerBase">
+        <description>
+            The feet controller.
+        </description>
+    </class>
 </library>

@@ -1,3 +1,5 @@
 controllers:
-  quad_controller_base:
+  legs_controller:
     type: unitree_ros/LegsController
+  feets_controller:
+    type: unitree_ros/FeetController

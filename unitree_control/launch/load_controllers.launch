@@ -1,5 +1,8 @@
 <launch>
     <rosparam file="$(find unitree_control)/config/default.yaml" command="load"/>
     <node name="controller_loader" pkg="controller_manager" type="controller_manager" output="screen"
-          args="load controllers/quad_controller_base"/>
+          args="load
+          controllers/legs_controller
+          controllers/feets_controller
+"/>
 </launch>

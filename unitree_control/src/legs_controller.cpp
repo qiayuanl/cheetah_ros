@@ -77,6 +77,7 @@ void LegsController::updateCommand(const ros::Time& time, const ros::Duration& p
     pinocchio::getFrameJacobian(*pin_model_, *pin_data_, pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot"),
                                 pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, jac);
     Eigen::Matrix<double, 6, 1> wrench;
+    wrench.setZero();
     wrench.head(3) = foot_force;
     Eigen::Matrix<double, 18, 1> tau = jac.transpose() * wrench;
     for (int joint = 0; joint < 3; ++joint)

@@ -8,25 +8,32 @@
 
 namespace unitree_ros
 {
-struct FootCommand
+enum FootState
 {
-  double time;
-  Eigen::Vector3d pos_final;
+  TOUCH,
+  SWING
+};
+
+struct FootData
+{
+  FootState state_;
+  double phase_, swing_time_;
+  Eigen::Vector3d foot_force_estimated;
 };
 
 class FeetController : public LegsController
 {
 public:
   FeetController() = default;
-  FeetController(std::shared_ptr<pinocchio::Model> model, std::shared_ptr<pinocchio::Data> data);
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
-  void update(const ros::Time& time, const ros::Duration& period) override;
-  void updateData(const ros::Time& time, const ros::Duration& period);
-  void updateCommand(const ros::Time& time, const ros::Duration& period);
+  void updateData(const ros::Time& time, const ros::Duration& period) override;
+  void updateCommand(const ros::Time& time, const ros::Duration& period) override;
+  FootData& getFootData(LegPrefix leg);
+  void setSwing(LegPrefix leg, Eigen::Vector3d final_pos, double swing_time);
+  void setTouch(LegPrefix leg, Eigen::Vector3d force);
 
 private:
   FootSwingTrajectory<double> feet_swing_trajectory_[4];
-  FootCommand feet_command_[4];
+  FootData feet_data_[4];
 };
 
 }  // namespace unitree_ros
