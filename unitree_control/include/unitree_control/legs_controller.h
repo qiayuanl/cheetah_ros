@@ -3,10 +3,11 @@
 //
 
 #pragma once
+#include <pinocchio/fwd.hpp>
+#include <pinocchio/multibody/model.hpp>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <unitree_common/hardware_interface/hybrid_joint_interface.h>
-#include <pinocchio/multibody/model.hpp>
 #include <utility>
 
 namespace unitree_ros

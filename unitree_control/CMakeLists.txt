@@ -70,6 +70,8 @@ link_directories(
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
         src/legs_controller.cpp
+        src/foot_swing_trajectory.cpp
+        src/feet_controller.cpp
         )
 
 add_dependencies(${PROJECT_NAME}

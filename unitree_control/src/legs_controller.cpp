@@ -1,7 +1,9 @@
 //
 // Created by qiayuan on 2021/11/6.
 //
-#include <pinocchio/fwd.hpp>
+
+#include "unitree_control/legs_controller.h"
+
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
@@ -9,8 +11,6 @@
 
 #include <urdf_parser/urdf_parser.h>
 #include <pluginlib/class_list_macros.hpp>
-
-#include "unitree_control/legs_controller.h"
 
 namespace unitree_ros
 {
@@ -51,7 +51,6 @@ void LegsController::update(const ros::Time& time, const ros::Duration& period)
 void LegsController::updateData(const ros::Time& time, const ros::Duration& period)
 {
   Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
-  //  v(0) = 2.0;
   for (int leg = 0; leg < 4; ++leg)
     for (int joint = 0; joint < 3; ++joint)
     {
