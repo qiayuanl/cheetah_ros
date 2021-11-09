@@ -33,8 +33,8 @@
     <xacro:property name="hip_offset" value="0.083"/>
 
     <!-- joint limits -->
-    <xacro:property name="damping" value="0"/>
-    <xacro:property name="friction" value="0"/>
+    <xacro:property name="damping" value="0.05"/>
+    <xacro:property name="friction" value="0.01"/>
     <xacro:property name="hip_max" value="${70*pi/180.0}"/>
     <xacro:property name="hip_min" value="${-70*pi/180.0}"/>
     <xacro:property name="hip_velocity_max" value="20"/>
