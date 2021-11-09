@@ -4,21 +4,14 @@
 
 #include "unitree_control/legs_controller.h"
 
-#include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 
-#include <urdf_parser/urdf_parser.h>
 #include <pluginlib/class_list_macros.hpp>
 
 namespace unitree_ros
 {
-LegsController::LegsController(std::shared_ptr<pinocchio::Model> model, std::shared_ptr<pinocchio::Data> data)
-  : pin_model_(std::move(model)), pin_data_(std::move(data))
-{
-}
-
 bool LegsController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
 {
   if (pin_model_ == nullptr && pin_data_ == nullptr)
@@ -96,12 +89,12 @@ LegJoint& LegsController::getLegJoint(LegPrefix leg)
   return leg_joints_[leg];
 }
 
-const LegData& LegsController::getData(LegPrefix leg)
+const LegData& LegsController::getLegData(LegPrefix leg)
 {
   return datas_[leg];
 }
 
-void LegsController::setCommand(LegPrefix leg, const LegCommand& command)
+void LegsController::setLegCmd(LegPrefix leg, const LegCommand& command)
 {
   commands_[leg] = command;
 }

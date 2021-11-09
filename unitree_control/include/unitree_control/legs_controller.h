@@ -4,7 +4,8 @@
 
 #pragma once
 #include <pinocchio/fwd.hpp>
-#include <pinocchio/multibody/model.hpp>
+#include <pinocchio/parsers/urdf.hpp>
+#include <urdf_parser/urdf_parser.h>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <unitree_common/hardware_interface/hybrid_joint_interface.h>
@@ -43,18 +44,19 @@ class LegsController
 {
 public:
   LegsController() = default;
-  LegsController(std::shared_ptr<pinocchio::Model> model, std::shared_ptr<pinocchio::Data> data);
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
   void update(const ros::Time& time, const ros::Duration& period) override;
-  void updateData(const ros::Time& time, const ros::Duration& period);
-  void updateCommand(const ros::Time& time, const ros::Duration& period);
+  virtual void updateData(const ros::Time& time, const ros::Duration& period);
+  virtual void updateCommand(const ros::Time& time, const ros::Duration& period);
   LegJoint& getLegJoint(LegPrefix leg);
-  const LegData& getData(LegPrefix leg);
-  void setCommand(LegPrefix leg, const LegCommand& command);
+  const LegData& getLegData(LegPrefix leg);
+  void setLegCmd(LegPrefix leg, const LegCommand& command);
 
-private:
+protected:
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
+
+private:
   LegJoint leg_joints_[4];
   LegData datas_[4];
   LegCommand commands_[4];
