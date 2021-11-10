@@ -26,12 +26,13 @@ bool LegsController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
     pin_data_ = std::make_shared<pinocchio::Data>(*pin_model_);
   }
   // Setup joint handles. Ignore id 0 (universe joint) and id 1 (root joint).
-  ROS_ASSERT(pin_model_->njoints == 14);
   HybridJointInterface* hybrid_joint_interface = robot_hw->get<HybridJointInterface>();
   for (int leg = 0; leg < 4; ++leg)
     for (int j = 0; j < 3; ++j)
       leg_joints_[leg].joints_[j] = hybrid_joint_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
 
+  // ROS Topic
+  legs_cmd_sub_ = controller_nh.subscribe<unitree_msgs::LegsCmd>("command", 1, &LegsController::legsCmdCallback, this);
   return true;
 }
 
@@ -67,6 +68,26 @@ void LegsController::updateData(const ros::Time& time, const ros::Duration& peri
 
 void LegsController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
+  // Update Command from ROS topic interface.
+  unitree_msgs::LegsCmd legs_cmd = *legs_cmd_buffer_.readFromRT();
+  for (auto& cmd : legs_cmd.legs_cmd)
+  {
+    if (legs_cmd.stamp >= commands_[cmd.leg_prefix.prefix].stamp_)
+    {
+      commands_[cmd.leg_prefix.prefix].stamp_ = legs_cmd.stamp;
+      commands_[cmd.leg_prefix.prefix].kp_cartesian_ << cmd.kp_cartesian[0], 0., 0., 0., cmd.kp_cartesian[1], 0., 0.,
+          0., cmd.kp_cartesian[2];
+      commands_[cmd.leg_prefix.prefix].kd_cartesian_ << cmd.kd_cartesian[0], 0., 0., 0., cmd.kd_cartesian[1], 0., 0.,
+          0., cmd.kd_cartesian[2];
+      for (int j = 0; j < 3; ++j)
+      {
+        commands_[cmd.leg_prefix.prefix].foot_pos_des_[j] = cmd.foot_pos_des[j];
+        commands_[cmd.leg_prefix.prefix].foot_vel_des_[j] = cmd.foot_pos_des[j];
+        commands_[cmd.leg_prefix.prefix].ff_cartesian_[j] = cmd.ff_cartesian[j];
+      }
+    }
+  }
+  // Update joint space command
   for (int leg = 0; leg < 4; ++leg)
   {
     Eigen::Vector3d foot_force = commands_[leg].ff_cartesian_;
@@ -85,19 +106,24 @@ void LegsController::updateCommand(const ros::Time& time, const ros::Duration& p
   }
 }
 
-LegJoint& LegsController::getLegJoint(LegPrefix leg)
+LegsController::Joints& LegsController::getLegJoints(LegPrefix leg)
 {
   return leg_joints_[leg];
 }
 
-const LegData& LegsController::getLegData(LegPrefix leg)
+const LegsController::Data& LegsController::getLegData(LegPrefix leg)
 {
   return datas_[leg];
 }
 
-void LegsController::setLegCmd(LegPrefix leg, const LegCommand& command)
+void LegsController::setLegCmd(LegPrefix leg, const Command& command)
 {
   commands_[leg] = command;
+}
+
+void LegsController::legsCmdCallback(const unitree_msgs::LegsCmd::ConstPtr& msg)
+{
+  legs_cmd_buffer_.writeFromNonRT(*msg);
 }
 
 }  // namespace unitree_ros

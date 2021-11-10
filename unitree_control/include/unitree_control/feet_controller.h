@@ -28,8 +28,8 @@ public:
   void updateData(const ros::Time& time, const ros::Duration& period) override;
   void updateCommand(const ros::Time& time, const ros::Duration& period) override;
   FootData& getFootData(LegPrefix leg);
-  void setSwing(LegPrefix leg, Eigen::Vector3d final_pos, double swing_time);
-  void setTouch(LegPrefix leg, Eigen::Vector3d force);
+  void setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double swing_time);
+  void setTouch(LegPrefix leg, const Eigen::Vector3d& force);
 
 private:
   FootSwingTrajectory<double> feet_swing_trajectory_[4];

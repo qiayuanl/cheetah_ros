@@ -18,6 +18,7 @@ find_package(catkin REQUIRED
         controller_interface
         realtime_tools
         unitree_common
+        unitree_msgs
         )
 
 #find_package(Boost REQUIRED COMPONENTS
@@ -40,6 +41,7 @@ catkin_package(
         controller_interface
         realtime_tools
         unitree_common
+        unitree_msgs
         DEPENDS
         #        Boost
 )
