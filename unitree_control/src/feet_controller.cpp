@@ -52,7 +52,7 @@ void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, d
   feet_data_[leg].phase_ = 0.;
   feet_data_[leg].swing_time_ = swing_time;
   feet_swing_trajectory_[leg].setHeight(0.1);
-  feet_swing_trajectory_[leg].setInitialPosition(getLegData(leg).foot_pos_);
+  feet_swing_trajectory_[leg].setInitialPosition(getLegState(leg).foot_pos_);
   feet_swing_trajectory_[leg].setFinalPosition(final_pos);
 }
 

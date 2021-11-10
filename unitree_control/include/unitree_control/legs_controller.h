@@ -11,7 +11,9 @@
 #include <unitree_common/hardware_interface/hybrid_joint_interface.h>
 
 #include <unitree_msgs/LegsCmd.h>
+#include <unitree_msgs/LegsState.h>
 #include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_publisher.h>
 
 namespace unitree_ros
 {
@@ -33,7 +35,7 @@ public:
   {
     HybridJointHandle joints_[3];
   };
-  struct Data
+  struct State
   {
     Eigen::Vector3d foot_pos_, foot_vel_;
   };
@@ -50,10 +52,12 @@ public:
   virtual void updateData(const ros::Time& time, const ros::Duration& period);
   virtual void updateCommand(const ros::Time& time, const ros::Duration& period);
   Joints& getLegJoints(LegPrefix leg);
-  const Data& getLegData(LegPrefix leg);
+  const State& getLegState(LegPrefix leg);
   void setLegCmd(LegPrefix leg, const Command& command);
 
 protected:
+  void publishState(const ros::Time& time, const ros::Duration& period);
+
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
 
@@ -61,11 +65,13 @@ private:
   void legsCmdCallback(const unitree_msgs::LegsCmd::ConstPtr& msg);
 
   Joints leg_joints_[4];
-  Data datas_[4];
+  State states_[4];
   Command commands_[4];
 
   ros::Subscriber legs_cmd_sub_;
   realtime_tools::RealtimeBuffer<unitree_msgs::LegsCmd> legs_cmd_buffer_;
+  std::shared_ptr<realtime_tools::RealtimePublisher<unitree_msgs::LegsState> > state_pub_;
+  ros::Time last_publish_;
 };
 
 };  // namespace unitree_ros

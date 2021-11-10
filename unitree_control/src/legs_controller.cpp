@@ -32,7 +32,10 @@ bool LegsController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
       leg_joints_[leg].joints_[j] = hybrid_joint_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
 
   // ROS Topic
-  legs_cmd_sub_ = controller_nh.subscribe<unitree_msgs::LegsCmd>("command", 1, &LegsController::legsCmdCallback, this);
+  legs_cmd_sub_ =
+      controller_nh.subscribe<unitree_msgs::LegsCmd>("/cmd_legs", 1, &LegsController::legsCmdCallback, this);
+  state_pub_ =
+      std::make_shared<realtime_tools::RealtimePublisher<unitree_msgs::LegsState>>(controller_nh, "/leg_states", 100);
   return true;
 }
 
@@ -40,6 +43,7 @@ void LegsController::update(const ros::Time& time, const ros::Duration& period)
 {
   updateData(time, period);
   updateCommand(time, period);
+  publishState(time, period);
 }
 
 void LegsController::updateData(const ros::Time& time, const ros::Duration& period)
@@ -59,8 +63,8 @@ void LegsController::updateData(const ros::Time& time, const ros::Duration& peri
   for (int leg = 0; leg < 4; ++leg)
   {
     pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
-    datas_[leg].foot_pos_ = pin_data_->oMf[frame_id].translation();
-    datas_[leg].foot_vel_ =
+    states_[leg].foot_pos_ = pin_data_->oMf[frame_id].translation();
+    states_[leg].foot_vel_ =
         pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED)
             .linear();
   }
@@ -90,8 +94,8 @@ void LegsController::updateCommand(const ros::Time& time, const ros::Duration& p
   {
     Eigen::Vector3d foot_force = commands_[leg].ff_cartesian_;
     // cartesian PD
-    foot_force += commands_[leg].kp_cartesian_ * (commands_[leg].foot_pos_des_ - datas_[leg].foot_pos_);
-    foot_force += commands_[leg].kd_cartesian_ * (commands_[leg].foot_vel_des_ - datas_[leg].foot_vel_);
+    foot_force += commands_[leg].kp_cartesian_ * (commands_[leg].foot_pos_des_ - states_[leg].foot_pos_);
+    foot_force += commands_[leg].kd_cartesian_ * (commands_[leg].foot_vel_des_ - states_[leg].foot_vel_);
     Eigen::Matrix<double, 6, 18> jac;
     pinocchio::getFrameJacobian(*pin_model_, *pin_data_, pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot"),
                                 pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, jac);
@@ -109,14 +113,39 @@ LegsController::Joints& LegsController::getLegJoints(LegPrefix leg)
   return leg_joints_[leg];
 }
 
-const LegsController::Data& LegsController::getLegData(LegPrefix leg)
+const LegsController::State& LegsController::getLegState(LegPrefix leg)
 {
-  return datas_[leg];
+  return states_[leg];
 }
 
 void LegsController::setLegCmd(LegPrefix leg, const Command& command)
 {
   commands_[leg] = command;
+}
+
+void LegsController::publishState(const ros::Time& time, const ros::Duration& period)
+{
+  if (time < ros::Time(0.01))  // When simulate time reset
+    last_publish_ = time;
+  if (time - last_publish_ > ros::Duration(0.01))  // 100Hz
+  {
+    last_publish_ = time;
+    unitree_msgs::LegsState legs_state;
+    legs_state.header.stamp = time;
+    if (state_pub_->trylock())
+    {
+      for (int leg = 0; leg < 4; ++leg)
+      {
+        state_pub_->msg_.foot_pos[leg].x = states_[leg].foot_pos_.x();
+        state_pub_->msg_.foot_pos[leg].y = states_[leg].foot_pos_.y();
+        state_pub_->msg_.foot_pos[leg].z = states_[leg].foot_pos_.z();
+        state_pub_->msg_.foot_vel[leg].x = states_[leg].foot_vel_.x();
+        state_pub_->msg_.foot_vel[leg].y = states_[leg].foot_vel_.y();
+        state_pub_->msg_.foot_vel[leg].z = states_[leg].foot_vel_.z();
+      }
+      state_pub_->unlockAndPublish();
+    }
+  }
 }
 
 void LegsController::legsCmdCallback(const unitree_msgs::LegsCmd::ConstPtr& msg)
