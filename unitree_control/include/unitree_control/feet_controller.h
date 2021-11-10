@@ -18,7 +18,6 @@ struct FootData
 {
   FootState state_;
   double phase_, swing_time_;
-  Eigen::Vector3d foot_force_estimated;
 };
 
 class FeetController : public LegsController

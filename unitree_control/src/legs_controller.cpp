@@ -69,24 +69,22 @@ void LegsController::updateData(const ros::Time& time, const ros::Duration& peri
 void LegsController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
   // Update Command from ROS topic interface.
-  unitree_msgs::LegsCmd legs_cmd = *legs_cmd_buffer_.readFromRT();
-  for (auto& cmd : legs_cmd.legs_cmd)
+  unitree_msgs::LegsCmd cmd_msgs = *legs_cmd_buffer_.readFromRT();
+  for (size_t j = 0; j < cmd_msgs.leg_prefix.size(); ++j)
   {
-    if (legs_cmd.stamp >= commands_[cmd.leg_prefix.prefix].stamp_)
+    Command& cmd = commands_[cmd_msgs.leg_prefix[j].prefix];
+    if (cmd_msgs.header.stamp >= cmd.stamp_)
     {
-      commands_[cmd.leg_prefix.prefix].stamp_ = legs_cmd.stamp;
-      commands_[cmd.leg_prefix.prefix].kp_cartesian_ << cmd.kp_cartesian[0], 0., 0., 0., cmd.kp_cartesian[1], 0., 0.,
-          0., cmd.kp_cartesian[2];
-      commands_[cmd.leg_prefix.prefix].kd_cartesian_ << cmd.kd_cartesian[0], 0., 0., 0., cmd.kd_cartesian[1], 0., 0.,
-          0., cmd.kd_cartesian[2];
-      for (int j = 0; j < 3; ++j)
-      {
-        commands_[cmd.leg_prefix.prefix].foot_pos_des_[j] = cmd.foot_pos_des[j];
-        commands_[cmd.leg_prefix.prefix].foot_vel_des_[j] = cmd.foot_pos_des[j];
-        commands_[cmd.leg_prefix.prefix].ff_cartesian_[j] = cmd.ff_cartesian[j];
-      }
+      cmd.stamp_ = cmd_msgs.header.stamp;
+      cmd.foot_pos_des_ << cmd_msgs.foot_pos_des[j].x, cmd_msgs.foot_pos_des[j].y, cmd_msgs.foot_pos_des[j].z;
+      cmd.foot_vel_des_ << cmd_msgs.foot_vel_des[j].x, cmd_msgs.foot_vel_des[j].y, cmd_msgs.foot_vel_des[j].z;
+      cmd.kp_cartesian_ << cmd_msgs.kp_cartesian[j].x, 0., 0., 0., cmd_msgs.kp_cartesian[j].y, 0., 0., 0.,
+          cmd_msgs.kp_cartesian[j].z;
+      cmd.kd_cartesian_ << cmd_msgs.kd_cartesian[j].x, 0., 0., 0., cmd_msgs.kd_cartesian[j].y, 0., 0., 0.,
+          cmd_msgs.kd_cartesian[j].z;
     }
   }
+
   // Update joint space command
   for (int leg = 0; leg < 4; ++leg)
   {

@@ -56,6 +56,10 @@ void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, d
   feet_swing_trajectory_[leg].setFinalPosition(final_pos);
 }
 
+void FeetController::setTouch(LegPrefix leg, const Eigen::Vector3d& force)
+{
+}
+
 }  // namespace unitree_ros
 
 PLUGINLIB_EXPORT_CLASS(unitree_ros::FeetController, controller_interface::ControllerBase)
