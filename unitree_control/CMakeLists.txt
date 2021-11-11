@@ -19,6 +19,7 @@ find_package(catkin REQUIRED
         realtime_tools
         unitree_common
         unitree_msgs
+        dynamic_reconfigure
         )
 
 #find_package(Boost REQUIRED COMPONENTS
@@ -28,6 +29,10 @@ find_package(catkin REQUIRED
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(pinocchio REQUIRED pinocchio)
+
+generate_dynamic_reconfigure_options(
+        cfg/Feet.cfg
+)
 
 catkin_package(
         INCLUDE_DIRS
@@ -42,6 +47,7 @@ catkin_package(
         realtime_tools
         unitree_common
         unitree_msgs
+        dynamic_reconfigure
         DEPENDS
         #        Boost
 )
@@ -78,6 +84,7 @@ add_library(${PROJECT_NAME}
 
 add_dependencies(${PROJECT_NAME}
         ${catkin_EXPORTED_TARGETS}
+        ${PROJECT_NAME}_gencfg
         )
 
 target_link_libraries(${PROJECT_NAME}

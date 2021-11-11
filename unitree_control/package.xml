@@ -18,6 +18,7 @@
     <depend>unitree_common</depend>
     <depend>unitree_msgs</depend>
     <depend>pinocchio</depend>
+    <depend>dynamic_reconfigure</depend>
 
     <exec_depend>controller_manager</exec_depend>
 
