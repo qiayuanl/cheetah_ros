@@ -44,15 +44,18 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
   for (size_t j = 0; j < cmd_msgs.leg_prefix.size(); ++j)
   {
     State& state = states_[cmd_msgs.leg_prefix[j].prefix];
-    if (cmd_msgs.header.stamp > state.take_off_time_)
+    if (cmd_msgs.header.stamp > state.cmd_time_)
     {
-      state.take_off_time_ = cmd_msgs.header.stamp;
-      Eigen::Vector3d pos_final(cmd_msgs.pos_final[j].x, cmd_msgs.pos_final[j].y, cmd_msgs.pos_final[j].z);
+      state.cmd_time_ = cmd_msgs.header.stamp;
       if (cmd_msgs.touch_state[j] == cmd_msgs.SWING)
-        setSwing(LegPrefix(cmd_msgs.leg_prefix[j].prefix), pos_final, cmd_msgs.swing_time[j]);
+      {
+        Eigen::Vector3d pos_final(cmd_msgs.pos_final[j].x, cmd_msgs.pos_final[j].y, cmd_msgs.pos_final[j].z);
+        setSwing(LegPrefix(cmd_msgs.leg_prefix[j].prefix), pos_final, cmd_msgs.height[j], cmd_msgs.swing_time[j]);
+      }
       else
       {
-        Eigen::Vector3d force(0, 0, 0);
+        Eigen::Vector3d force(cmd_msgs.ground_reaction_force[j].x, cmd_msgs.ground_reaction_force[j].y,
+                              cmd_msgs.ground_reaction_force[j].z);
         setStand(LegPrefix(cmd_msgs.leg_prefix[j].prefix), force);
       }
     }
@@ -84,12 +87,12 @@ FeetController::State& FeetController::getFootState(LegPrefix leg)
   return states_[leg];
 }
 
-void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double swing_time)
+void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double height, double swing_time)
 {
   states_[leg].touch_state_ = SWING;
   states_[leg].phase_ = 0.;
   states_[leg].swing_time_ = swing_time;
-  swing_trajectory_[leg].setHeight(0.1);
+  swing_trajectory_[leg].setHeight(height);
   swing_trajectory_[leg].setInitialPosition(getLegState(leg).foot_pos_);
   swing_trajectory_[leg].setFinalPosition(final_pos);
 }

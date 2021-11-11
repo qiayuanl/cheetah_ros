@@ -22,7 +22,7 @@ public:
   struct State
   {
     TouchState touch_state_;
-    ros::Time take_off_time_;
+    ros::Time cmd_time_;
     double phase_, swing_time_;
   };
   struct K
@@ -34,7 +34,7 @@ public:
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
   void updateCommand(const ros::Time& time, const ros::Duration& period) override;
   State& getFootState(LegPrefix leg);
-  void setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double swing_time);
+  void setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double height, double swing_time);
   void setStand(LegPrefix leg, const Eigen::Vector3d& force);
 
 private:
