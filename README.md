@@ -115,6 +115,13 @@ The gif below shows a loop action command by a simple script.
 
 ![](doc/swing.gif)
 
+However, using the ROS topic interface in high frequency and real-time requirements is **NOT RECOMMEND** and **UNSAFE**.
+
+You had better inherit from `legs_controller` or `feet_controller` as the base class, create a new controller running in
+the `hardware_interface`, which allow you command the leg or joint directly using pointer in **1kHz and real-time safe**
+. [TODO]() shows a locomotion controller base on [Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)
+.
+
 ## Bugs & Feature Requests
 
 Please report bugs and request features using the [Issue Tracker](https://github.com/qiayuanliao/unitree_ros/issues)
