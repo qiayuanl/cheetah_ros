@@ -8,6 +8,18 @@
         </plugin>
     </gazebo>
 
+    <gazebo>
+        <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100.0</updateRate>
+            <bodyName>base_link</bodyName>
+            <topicName>odom</topicName>
+            <gaussianNoise>0</gaussianNoise>
+            <frameName>world</frameName>
+            <xyzOffsets>0 0 0</xyzOffsets>
+            <rpyOffsets>0 0 0</rpyOffsets>
+        </plugin>
+    </gazebo>
     <!--    &lt;!&ndash; Show the trajectory of trunk center. &ndash;&gt;-->
     <!--    <gazebo>-->
     <!--        <plugin name="3dplot" filename="libLinkPlot3DPlugin.so">-->
