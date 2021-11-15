@@ -45,6 +45,10 @@ public:
     Eigen::Vector3d foot_pos_des_, foot_vel_des_, ff_cartesian_;
     Eigen::Matrix3d kp_cartesian_, kd_cartesian_;
   };
+  struct BaseState
+  {
+    Eigen::Vector3d pos_, quat_, linear_vel_, angular_vel_;
+  };
 
   LegsController() = default;
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
@@ -54,6 +58,7 @@ public:
   Joints& getLegJoints(LegPrefix leg);
   const State& getLegState(LegPrefix leg);
   void setLegCmd(LegPrefix leg, const Command& command);
+  void setBaseState(const BaseState& state);
 
 protected:
   void publishState(const ros::Time& time, const ros::Duration& period);
@@ -67,6 +72,7 @@ private:
   Joints leg_joints_[4];
   State states_[4];
   Command commands_[4];
+  BaseState base_state_{};
 
   ros::Subscriber legs_cmd_sub_;
   realtime_tools::RealtimeBuffer<unitree_msgs::LegsCmd> legs_cmd_buffer_;

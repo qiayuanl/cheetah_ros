@@ -13,7 +13,7 @@
             <alwaysOn>true</alwaysOn>
             <updateRate>100.0</updateRate>
             <bodyName>base_link</bodyName>
-            <topicName>odom</topicName>
+            <topicName>ground_truth/state</topicName>
             <gaussianNoise>0</gaussianNoise>
             <frameName>world</frameName>
             <xyzOffsets>0 0 0</xyzOffsets>

@@ -163,11 +163,11 @@ void FeetController::dynamicCallback(FeetConfig& config, uint32_t /*unused*/)
   k.kd_stand_(1, 1) = config.kd_stand_y;
   k.kd_stand_(2, 2) = config.kd_stand_z;
   k.kp_swing_(0, 0) = config.kp_swing_x;
-  k.kp_swing_(1, 1) = config.kp_swing_x;
-  k.kp_swing_(2, 2) = config.kp_swing_x;
+  k.kp_swing_(1, 1) = config.kp_swing_y;
+  k.kp_swing_(2, 2) = config.kp_swing_z;
   k.kd_swing_(0, 0) = config.kd_swing_x;
-  k.kd_swing_(1, 1) = config.kd_swing_x;
-  k.kd_swing_(2, 2) = config.kd_swing_x;
+  k.kd_swing_(1, 1) = config.kd_swing_y;
+  k.kd_swing_(2, 2) = config.kd_swing_z;
 
   k_buffer.writeFromNonRT(k);
 }

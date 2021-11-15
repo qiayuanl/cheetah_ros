@@ -49,6 +49,9 @@ void LegsController::update(const ros::Time& time, const ros::Duration& period)
 void LegsController::updateData(const ros::Time& time, const ros::Duration& period)
 {
   Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
+  q.head(7) << base_state_.pos_, base_state_.quat_;
+  v.head(6) << base_state_.linear_vel_, base_state_.angular_vel_;
+
   for (int leg = 0; leg < 4; ++leg)
     for (int joint = 0; joint < 3; ++joint)
     {
@@ -121,6 +124,11 @@ const LegsController::State& LegsController::getLegState(LegPrefix leg)
 void LegsController::setLegCmd(LegPrefix leg, const Command& command)
 {
   commands_[leg] = command;
+}
+
+void LegsController::setBaseState(const BaseState& state)
+{
+  base_state_ = state;
 }
 
 void LegsController::publishState(const ros::Time& time, const ros::Duration& period)
