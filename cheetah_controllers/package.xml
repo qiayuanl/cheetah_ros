@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>cheetah_controllers</name>
+    <version>0.0.0</version>
+    <description>The unitree_control packages.</description>
+    <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
+    <license>BSD</license>
+    <author email="liaoqiayuan@gmail.com">Qiayuan Liao</author>
+
+    <!-- buildtool_depend: dependencies of the build process -->
+    <buildtool_depend>catkin</buildtool_depend>
+    <!-- depend: build, export, and execution dependency -->
+    <depend>roscpp</depend>
+    <depend>roslint</depend>
+    <depend>controller_interface</depend>
+    <depend>unitree_control</depend>
+    <depend>pinocchio</depend>
+
+    <exec_depend>controller_manager</exec_depend>
+
+    <export>
+        <controller_interface plugin="${prefix}/cheetah_controllers_plugins.xml"/>
+    </export>
+</package>
