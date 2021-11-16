@@ -25,11 +25,11 @@ protected:
   State state_;
 };
 
-class GroundTruthStateEstimate : public StateEstimateBase
+class GroundTruth : public StateEstimateBase
 {
 public:
-  GroundTruthStateEstimate(ros::NodeHandle& nh);
-  ~GroundTruthStateEstimate() override{};
+  GroundTruth(ros::NodeHandle& nh);
+  ~GroundTruth() override{};
 
   const State& getState() override;
 

@@ -5,17 +5,17 @@
 
 namespace unitree_ros
 {
-GroundTruthStateEstimate::GroundTruthStateEstimate(ros::NodeHandle& nh) : StateEstimateBase(nh)
+GroundTruth::GroundTruth(ros::NodeHandle& nh) : StateEstimateBase(nh)
 {
-  sub_ = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state", 100, &GroundTruthStateEstimate::callback, this);
+  sub_ = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state", 100, &GroundTruth::callback, this);
 }
 
-void GroundTruthStateEstimate::callback(const nav_msgs::Odometry::ConstPtr& msg)
+void GroundTruth::callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
   buffer_.writeFromNonRT(*msg);
 }
 
-const StateEstimateBase::State& GroundTruthStateEstimate::getState()
+const StateEstimateBase::State& GroundTruth::getState()
 {
   nav_msgs::Odometry odom = *buffer_.readFromRT();
   state_.pos_ << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;

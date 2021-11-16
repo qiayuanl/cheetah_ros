@@ -16,12 +16,8 @@ find_package(catkin REQUIRED
         roslint
         controller_interface
         unitree_control
+        qpoases_vendor
         )
-
-#find_package(Boost REQUIRED COMPONENTS
-#        system
-#        filesystem
-#        )
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(pinocchio REQUIRED pinocchio)
@@ -36,8 +32,7 @@ catkin_package(
         roslint
         controller_interface
         unitree_control
-        DEPENDS
-        #        Boost
+        qpoases_vendor
 )
 
 ###########
@@ -55,8 +50,8 @@ set(FLAGS
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
-        #        ${Boost_INCLUDE_DIRS}
         ${pinocchio_INCLUDE_DIRS}
+        ${qpoases_vendor_INCLUDE_DIRS}/qpoases_vendor
 )
 
 link_directories(
@@ -66,13 +61,14 @@ link_directories(
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
         src/state_estimate.cpp
+        src/mpc_formulation.cpp
         src/locomotion.cpp
         )
 
 target_link_libraries(${PROJECT_NAME}
-        #        ${Boost_LIBRARIES}
         ${catkin_LIBRARIES}
         ${pinocchio_LIBRARIES}
+        ${qpoases_vendor_LIBRARIES}
         )
 
 target_compile_options(${PROJECT_NAME} PUBLIC ${FLAGS})

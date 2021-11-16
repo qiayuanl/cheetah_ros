@@ -14,7 +14,7 @@
     <depend>roslint</depend>
     <depend>controller_interface</depend>
     <depend>unitree_control</depend>
-    <depend>pinocchio</depend>
+    <depend>qpoases_vendor</depend>
 
     <exec_depend>controller_manager</exec_depend>
 

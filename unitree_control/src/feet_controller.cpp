@@ -15,7 +15,7 @@ bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   K k;
   XmlRpc::XmlRpcValue feet_params;
   controller_nh.getParam("feet", feet_params);
-  ROS_ASSERT(feet_params.getType() == XmlRpc::XmlRpcValue::TypeStruct)
+  ROS_ASSERT(feet_params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
 
   k.kp_stand_ = initK(feet_params, "kp_stand");
   k.kd_stand_ = initK(feet_params, "kd_stand");
