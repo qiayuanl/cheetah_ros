@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "legs_controller.h"
+#include "controller_base.h"
 #include "foot_swing_trajectory.h"
 #include <unitree_msgs/FeetCmd.h>
 #include <unitree_control/FeetConfig.h>
@@ -11,7 +11,7 @@
 
 namespace unitree_ros
 {
-class FeetController : public LegsController
+class FeetController : public ControllerBase
 {
 public:
   enum TouchState

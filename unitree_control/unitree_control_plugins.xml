@@ -1,9 +1,9 @@
 <library path="lib/libunitree_control">
 
-    <class name="unitree_ros/LegsController" type="unitree_ros::LegsController"
+    <class name="unitree_ros/ControllerBase" type="unitree_ros::ControllerBase"
            base_class_type="controller_interface::ControllerBase">
         <description>
-            The legs controller.
+            The controller base of quadruped.
         </description>
     </class>
 

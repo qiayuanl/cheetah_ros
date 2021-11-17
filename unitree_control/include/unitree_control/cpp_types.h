@@ -7,6 +7,23 @@
 #include <vector>
 #include <eigen3/Eigen/Dense>
 
+struct RobotState
+{
+  Eigen::Vector4d quat_;
+  Eigen::Vector3d pos_, linear_vel_, angular_vel_;
+  Eigen::Vector3d foot_pos_[4], foot_vel_[4];
+};
+
+enum LegPrefix
+{
+  FL,
+  FR,
+  RL,
+  RR
+};
+
+const static std::string LEG_PREFIX[4] = { "FL", "FR", "RL", "RR" };
+
 // Rotation Matrix
 template <typename T>
 using RotMat = typename Eigen::Matrix<T, 3, 3>;

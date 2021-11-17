@@ -3,26 +3,22 @@
 //
 
 #pragma once
-#include <unitree_control/legs_controller.h>
+#include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <realtime_tools/realtime_buffer.h>
+
+#include "cpp_types.h"
 
 namespace unitree_ros
 {
 class StateEstimateBase
 {
 public:
-  using State = LegsController::BaseState;
   StateEstimateBase(ros::NodeHandle& nh)
   {
   }
   virtual ~StateEstimateBase(){};
-  virtual const State& getState()
-  {
-    return state_;
-  }
-
-protected:
-  State state_;
+  virtual void update(RobotState& state){};
 };
 
 class GroundTruth : public StateEstimateBase
@@ -31,7 +27,7 @@ public:
   GroundTruth(ros::NodeHandle& nh);
   ~GroundTruth() override{};
 
-  const State& getState() override;
+  void update(RobotState& state) override;
 
 private:
   void callback(const nav_msgs::Odometry::ConstPtr& msg);

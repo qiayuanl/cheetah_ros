@@ -60,7 +60,6 @@ link_directories(
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
-        src/state_estimate.cpp
         src/mpc_formulation.cpp
         src/locomotion.cpp
         )
