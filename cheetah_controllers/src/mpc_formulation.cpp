@@ -17,7 +17,7 @@ void MpcFormulation::setConfig(const MpcFormulation::Config& config)
   int horizon = config_.horizon_;
   a_qp_.resize(STATE_DIM * horizon, Eigen::NoChange);
   b_qp_.resize(STATE_DIM * horizon, ACTION_DIM * horizon);
-  l_.resize(STATE_DIM * horizon, STATE_DIM * horizon);
+  l_.resize(STATE_DIM * horizon);
   h_.resize(ACTION_DIM * horizon, ACTION_DIM * horizon);
   g_.resize(ACTION_DIM * horizon, Eigen::NoChange);
   c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
@@ -34,7 +34,7 @@ void MpcFormulation::setConfig(const MpcFormulation::Config& config)
 
 void MpcFormulation::updateModel(const RobotState& state)
 {
-  Matrix3d rot;  // TODO:
+  Matrix3d rot;  // TODO: convert from quat
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
     r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
@@ -52,7 +52,7 @@ const MatrixXd& MpcFormulation::getHessianMat()
 const VectorXd& MpcFormulation::getGVec(const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
 {
   // Update x_0 and x_ref
-  Vector3d rpy;  // TODO
+  Vector3d rpy;  // TODO: convert from quat
   rpy.setZero();
   Matrix<double, STATE_DIM, 1> x_0;
   VectorXd x_ref(STATE_DIM * config_.horizon_);

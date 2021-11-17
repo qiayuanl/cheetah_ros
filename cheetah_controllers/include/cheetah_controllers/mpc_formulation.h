@@ -11,7 +11,6 @@
 
 namespace unitree_ros
 {
-using Eigen::AngleAxisd;
 using Eigen::Dynamic;
 using Eigen::Matrix;
 using Eigen::Matrix3d;
@@ -20,7 +19,7 @@ using Eigen::Quaterniond;
 using Eigen::Vector3d;
 using Eigen::VectorXd;
 
-class MpcFormulation
+class MpcFormulation  // TODO: template for float
 {
 public:
   static constexpr int STATE_DIM = 13;   // 6 dof pose + 6 dof velocity + 1 gravity.
@@ -60,7 +59,8 @@ private:
   MatrixXd b_qp_;
 
   // Weight
-  MatrixXd l_;  // L matrix: Diagonal matrix of weights for state deviations
+  // L matrix: Diagonal matrix of weights for state deviations
+  Eigen::DiagonalMatrix<double, Eigen::Dynamic, Eigen::Dynamic> l_;
 
   // Final QP Formation
   // 1/2 U^{-T} H U + U^{T} g
