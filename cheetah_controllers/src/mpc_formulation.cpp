@@ -74,11 +74,10 @@ void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
   }
 }
 
-void MpcFormulation::build(const StateEstimateBase::State& state, const Matrix3d& feet_pos,
-                           const Matrix<double, Dynamic, 1>& traj)
+void MpcFormulation::build(const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
 {
   // Update x_0 and x_ref
-  Vector3d rpy;
+  Vector3d rpy;  // TODO
   rpy.setZero();
   Matrix<double, STATE_DIM, 1> x_0;
   Matrix<double, Dynamic, 1> x_ref;
@@ -101,10 +100,10 @@ void MpcFormulation::build(const StateEstimateBase::State& state, const Matrix3d
   Matrix<double, Dynamic, STATE_DIM> a_qp;
   Matrix<double, Dynamic, Dynamic> b_qp;
 
-  Matrix3d rot;
+  Matrix3d rot;  // TODO
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
-    r_feet.col(i) = feet_pos.col(i) - state.pos_;
+    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
 
   buildStateSpace(rot, r_feet, a_c, b_c);
   buildQp(a_c, b_c, a_qp, b_qp);
@@ -128,9 +127,14 @@ void MpcFormulation::build(const StateEstimateBase::State& state, const Matrix3d
       u_b_(row + 1) = big_value;
       u_b_(row + 2) = big_value;
       u_b_(row + 3) = big_value;
-      //      u_b_(row + 4) = config_.f_max_ * contact_state(i, j);
+      u_b_(row + 4) = config_.f_max_ * state.contact_state_(j);
     }
   }
+}
+
+void MpcFormulation::setConfig(const MpcFormulation::Config& config)
+{
+  config_ = config;
 }
 
 }  // namespace unitree_ros

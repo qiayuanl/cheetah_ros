@@ -2,7 +2,8 @@
 // Created by qiayuan on 2021/11/16.
 //
 #pragma once
-#include "state_estimate.h"
+
+#include <unitree_control/cpp_types.h>
 
 #include <vector>
 #include <Eigen/Dense>
@@ -37,8 +38,8 @@ public:
     Matrix3d inertia_;
     double weight_[12];
   };
-
-  void build(const StateEstimateBase::State& state, const Matrix3d& feet_pos, const Matrix<double, Dynamic, 1>& x_des);
+  void setConfig(const Config& config);
+  void build(const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
 
 private:
   void buildStateSpace(const Matrix3d& rot_yaw, const Matrix<double, 3, 4>& r_feet,
