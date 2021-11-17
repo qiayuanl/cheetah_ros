@@ -16,8 +16,8 @@ class FeetController : public ControllerBase
 public:
   enum TouchState
   {
-    STAND = 0,
-    SWING
+    SWING = 0,
+    STAND,
   };
   struct State
   {
