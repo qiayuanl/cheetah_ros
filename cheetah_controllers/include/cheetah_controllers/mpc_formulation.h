@@ -5,7 +5,6 @@
 
 #include <unitree_control/cpp_types.h>
 
-#include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -38,22 +37,38 @@ public:
     Matrix3d inertia_;
     double weight_[12];
   };
+
   void setConfig(const Config& config);
-  void build(const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
+  void updateModel(const RobotState& state);
+
+  const MatrixXd& getHessianMat();
+  const VectorXd& getGVec(const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
+  const MatrixXd& getConstrainMat();
+  const VectorXd& getUpperBound(const RobotState& state);
+  const VectorXd& getLowerBound();
 
 private:
   void buildStateSpace(const Matrix3d& rot_yaw, const Matrix<double, 3, 4>& r_feet,
                        Matrix<double, STATE_DIM, STATE_DIM>& a, Matrix<double, STATE_DIM, ACTION_DIM>& b);
   void buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c, const Matrix<double, STATE_DIM, ACTION_DIM>& b_c,
-               Matrix<double, Dynamic, STATE_DIM>& a_qp, Matrix<double, Dynamic, Dynamic>& b_qp);
+               Matrix<double, Dynamic, STATE_DIM>& a_qp, MatrixXd& b_qp);
+
+  // State Space Model
+  Matrix<double, STATE_DIM, STATE_DIM> a_c_;
+  Matrix<double, STATE_DIM, ACTION_DIM> b_c_;
+  Matrix<double, Dynamic, STATE_DIM> a_qp_;
+  MatrixXd b_qp_;
+
+  // Weight
+  MatrixXd l_;  // L matrix: Diagonal matrix of weights for state deviations
 
   // Final QP Formation
   // 1/2 U^{-T} H U + U^{T} g
-  Matrix<double, Dynamic, Dynamic> h_;  // hessian Matrix
-  Matrix<double, Dynamic, 1> g_;        // g vector
-  Matrix<double, Dynamic, 1> c_;        // constrain matrix
-  Matrix<double, Dynamic, 1> u_b_;      // upper bound
-  Matrix<double, Dynamic, 1> l_b_;      // lower bound
+  MatrixXd h_;    // hessian Matrix
+  VectorXd g_;    // g vector
+  MatrixXd c_;    // constrain matrix
+  VectorXd u_b_;  // upper bound
+  VectorXd l_b_;  // lower bound
 
   Config config_;
 };

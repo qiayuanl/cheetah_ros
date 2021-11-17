@@ -10,6 +10,97 @@
 
 namespace unitree_ros
 {
+void MpcFormulation::setConfig(const MpcFormulation::Config& config)
+{
+  config_ = config;
+  // Resize
+  int horizon = config_.horizon_;
+  a_qp_.resize(STATE_DIM * horizon, Eigen::NoChange);
+  b_qp_.resize(STATE_DIM * horizon, ACTION_DIM * horizon);
+  l_.resize(STATE_DIM * horizon, STATE_DIM * horizon);
+  h_.resize(ACTION_DIM * horizon, ACTION_DIM * horizon);
+  g_.resize(ACTION_DIM * horizon, Eigen::NoChange);
+  c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
+  u_b_.resize(5 * 4 * horizon, Eigen::NoChange);
+  l_b_.resize(5 * 4 * horizon, Eigen::NoChange);
+
+  // Weight
+  Matrix<double, STATE_DIM, 1> full_weight;
+  for (int i = 0; i < STATE_DIM - 1; i++)
+    full_weight(i) = config_.weight_[i];
+  full_weight(12) = 0.f;
+  l_.diagonal() = full_weight.replicate(horizon, 1);
+}
+
+void MpcFormulation::updateModel(const RobotState& state)
+{
+  Matrix3d rot;  // TODO:
+  Matrix<double, 3, 4> r_feet;
+  for (int i = 0; i < 4; ++i)
+    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
+
+  buildStateSpace(rot, r_feet, a_c_, b_c_);
+  buildQp(a_c_, b_c_, a_qp_, b_qp_);
+}
+
+const MatrixXd& MpcFormulation::getHessianMat()
+{
+  h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
+  return h_;
+}
+
+const VectorXd& MpcFormulation::getGVec(const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
+{
+  // Update x_0 and x_ref
+  Vector3d rpy;  // TODO
+  rpy.setZero();
+  Matrix<double, STATE_DIM, 1> x_0;
+  VectorXd x_ref(STATE_DIM * config_.horizon_);
+  x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, config_.gravity_;
+  for (int i = 0; i < config_.horizon_; i++)
+    for (int j = 0; j < STATE_DIM - 1; j++)
+      x_ref(STATE_DIM * i + j, 0) = traj[12 * i + j];
+
+  // Calculate Hessian and g
+  g_ = 2. * b_qp_.transpose() * l_ * (a_qp_ * x_0 - x_ref);
+  return g_;
+}
+
+const MatrixXd& MpcFormulation::getConstrainMat()
+{
+  c_.setZero();
+  double mu_inv = 1.f / config_.mu_;
+  Matrix<double, 5, 3> c_block;
+  c_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
+  for (int i = 0; i < config_.horizon_ * 4; i++)
+    c_.block(i * 5, i * 3, 5, 3) = c_block;
+  return c_;
+}
+
+const VectorXd& MpcFormulation::getUpperBound(const RobotState& state)
+{
+  for (int i = 0; i < config_.horizon_; ++i)
+  {
+    for (int j = 0; j < 4; ++j)
+    {
+      const int row = (i * 4 + j) * 5;
+      const double big_value = 1e10;
+      u_b_(row) = big_value;
+      u_b_(row + 1) = big_value;
+      u_b_(row + 2) = big_value;
+      u_b_(row + 3) = big_value;
+      u_b_(row + 4) = config_.f_max_ * state.contact_state_(j);
+    }
+  }
+  return u_b_;
+}
+
+const VectorXd& MpcFormulation::getLowerBound()
+{
+  l_b_.setZero();
+  return l_b_;
+}
+
 // Converts a vector to the skew symmetric matrix form. For an input vector
 // [a, b, c], the output matrix would be:
 //   [ 0, -c,  b]
@@ -43,7 +134,7 @@ void MpcFormulation::buildStateSpace(const Matrix3d& rot_yaw, const Matrix<doubl
 
 void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
                              const Matrix<double, STATE_DIM, ACTION_DIM>& b_c, Matrix<double, Dynamic, STATE_DIM>& a_qp,
-                             Matrix<double, Dynamic, Dynamic>& b_qp)
+                             MatrixXd& b_qp)
 {
   // Convert model from continuous to discrete time
   Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_c;
@@ -72,69 +163,6 @@ void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
       }
     }
   }
-}
-
-void MpcFormulation::build(const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
-{
-  // Update x_0 and x_ref
-  Vector3d rpy;  // TODO
-  rpy.setZero();
-  Matrix<double, STATE_DIM, 1> x_0;
-  Matrix<double, Dynamic, 1> x_ref;
-  x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, -config_.gravity_;
-  for (int i = 0; i < config_.horizon_; i++)
-    for (int j = 0; j < STATE_DIM - 1; j++)
-      x_ref(STATE_DIM * i + j, 0) = traj[12 * i + j];
-
-  // Weight
-  Matrix<double, STATE_DIM, 1> full_weight;
-  for (int i = 0; i < STATE_DIM - 1; i++)
-    full_weight(i) = config_.weight_[i];
-  full_weight(12) = 0.f;
-  Matrix<double, Dynamic, Dynamic> l;  // L matrix: Diagonal matrix of weights for state deviations
-  l.diagonal() = full_weight.replicate(config_.horizon_, 1);
-
-  // Calculate Hessian and g
-  Matrix<double, STATE_DIM, STATE_DIM> a_c;
-  Matrix<double, STATE_DIM, ACTION_DIM> b_c;
-  Matrix<double, Dynamic, STATE_DIM> a_qp;
-  Matrix<double, Dynamic, Dynamic> b_qp;
-
-  Matrix3d rot;  // TODO
-  Matrix<double, 3, 4> r_feet;
-  for (int i = 0; i < 4; ++i)
-    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
-
-  buildStateSpace(rot, r_feet, a_c, b_c);
-  buildQp(a_c, b_c, a_qp, b_qp);
-
-  h_ = 2. * (b_qp.transpose() * l * b_qp);  // TODO: add K
-  g_ = 2. * b_qp.transpose() * l * (a_qp * x_0 - x_ref);
-  // Calculate contains
-  double mu_inv = 1.f / config_.mu_;
-  Matrix<double, 5, 3> c_block;
-  c_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
-  for (int i = 0; i < config_.horizon_ * 4; i++)
-    c_.block(i * 5, i * 3, 5, 3) = c_block;
-  l_b_.setZero();
-  for (int i = 0; i < config_.horizon_; ++i)
-  {
-    for (int j = 0; j < 4; ++j)
-    {
-      const int row = (i * 4 + j) * 5;
-      const double big_value = 1e10;
-      u_b_(row) = big_value;
-      u_b_(row + 1) = big_value;
-      u_b_(row + 2) = big_value;
-      u_b_(row + 3) = big_value;
-      u_b_(row + 4) = config_.f_max_ * state.contact_state_(j);
-    }
-  }
-}
-
-void MpcFormulation::setConfig(const MpcFormulation::Config& config)
-{
-  config_ = config;
 }
 
 }  // namespace unitree_ros

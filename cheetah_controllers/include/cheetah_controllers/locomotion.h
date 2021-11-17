@@ -3,8 +3,6 @@
 //
 
 #pragma once
-#include "unitree_control/state_estimate.h"
-
 #include <unitree_control/feet_controller.h>
 
 namespace unitree_ros
