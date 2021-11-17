@@ -5,6 +5,7 @@
 #pragma once
 #include <unitree_control/feet_controller.h>
 #include "mpc_solver.h"
+#include "gait.h"
 
 namespace unitree_ros
 {
