@@ -9,14 +9,16 @@
 
 struct RobotState
 {
-  Eigen::Vector4d quat_;
+  Eigen::Quaterniond quat_;
   Eigen::Vector3d pos_, linear_vel_, angular_vel_;
   Eigen::Vector3d foot_pos_[4], foot_vel_[4];
+  Eigen::Vector4d contact_state_;
+  Eigen::Matrix3d inertia_;
 };
 
 enum LegPrefix
 {
-  FL,
+  FL = 0,
   FR,
   RL,
   RR

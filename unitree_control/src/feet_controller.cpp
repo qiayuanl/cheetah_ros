@@ -10,7 +10,7 @@ namespace unitree_ros
 {
 bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
 {
-  if (!LegsController::init(robot_hw, controller_nh))
+  if (!ControllerBase::init(robot_hw, controller_nh))
     return false;
   K k;
   XmlRpc::XmlRpcValue feet_params;
@@ -66,7 +66,7 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
   {
     if (states_[leg].touch_state_ == SWING)
     {
-      LegsController::Command leg_cmd;
+      LegCmd leg_cmd;
       states_[leg].phase_ += period.toSec() / states_[leg].swing_time_;
       if (states_[leg].phase_ > 1.)
         states_[leg].phase_ = 1.;
@@ -79,7 +79,7 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
       setLegCmd(LegPrefix(leg), leg_cmd);
     }
   }
-  LegsController::updateCommand(time, period);
+  ControllerBase::updateCommand(time, period);
 }
 
 FeetController::State& FeetController::getFootState(LegPrefix leg)
@@ -93,7 +93,7 @@ void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, d
   states_[leg].phase_ = 0.;
   states_[leg].swing_time_ = swing_time;
   swing_trajectory_[leg].setHeight(height);
-  swing_trajectory_[leg].setInitialPosition(getLegState(leg).foot_pos_);
+  swing_trajectory_[leg].setInitialPosition(robot_state_.foot_pos_[leg]);
   swing_trajectory_[leg].setFinalPosition(final_pos);
 }
 
@@ -101,8 +101,8 @@ void FeetController::setStand(LegPrefix leg, const Eigen::Vector3d& force)
 {
   states_[leg].touch_state_ = STAND;
   K k = *k_buffer.readFromRT();
-  LegsController::Command leg_cmd;
-  leg_cmd.foot_pos_des_ = getLegState(leg).foot_pos_;
+  LegCmd leg_cmd;
+  leg_cmd.foot_pos_des_ = robot_state_.foot_pos_[leg];
   leg_cmd.foot_vel_des_.setZero();
   leg_cmd.kp_cartesian_ = k.kp_stand_;
   leg_cmd.kd_cartesian_ = k.kd_stand_;

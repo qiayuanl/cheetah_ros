@@ -90,12 +90,12 @@ Start a controller by right clik and select start.
 
 After start the controller (for example: `feet_controller`), you can control the leg/legs or foot/feet by sending
 message to topic, like the command line code above command FL foot follow a bezier cure with height 0.1 meter and
-finally reach the position {x: 0.0, y: 0.0, z: -0.3} in 0.5 second.
+finally reach the position {x: 0.0, y: 0.0, z: 0.7} in 0.5 second.
 
 ```
 rostopic pub /cmd_feet unitree_msgs/FeetCmd "header:
   seq: 0
-  stamp: {secs: 2, nsecs: 0}
+  stamp: {secs: 1, nsecs: 0}
   frame_id: ''
 leg_prefix:
 - {prefix: 0}
@@ -103,7 +103,7 @@ touch_state: [1]
 ground_reaction_force:
 - {x: 0.0, y: 0.0, z: 0.0}
 pos_final:
-- {x: 0.0, y: 0.0, z: -0.3}
+- {x: 0.0, y: 0.0, z: 0.7}
 height: [0.1]
 swing_time: [0.5]"
 ```

@@ -48,6 +48,9 @@ public:
 protected:
   void publishState(const ros::Time& time, const ros::Duration& period);
 
+  RobotState robot_state_;
+  std::shared_ptr<StateEstimateBase> state_estimate_;
+
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
 
@@ -56,7 +59,6 @@ private:
 
   LegJoints leg_joints_[4];
   LegCmd leg_cmd_[4];
-  RobotState state_;
 
   ros::Subscriber legs_cmd_sub_;
   realtime_tools::RealtimeBuffer<unitree_msgs::LegsCmd> legs_cmd_buffer_;

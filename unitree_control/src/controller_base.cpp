@@ -36,6 +36,8 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
       controller_nh.subscribe<unitree_msgs::LegsCmd>("/cmd_legs", 1, &ControllerBase::legsCmdCallback, this);
   state_pub_ =
       std::make_shared<realtime_tools::RealtimePublisher<unitree_msgs::LegsState>>(controller_nh, "/leg_states", 100);
+
+  state_estimate_ = std::make_shared<GroundTruth>(controller_nh);  // TODO add interface
   return true;
 }
 
@@ -57,8 +59,11 @@ void ControllerBase::updateData(const ros::Time& time, const ros::Duration& peri
       q(7 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getPosition();
       v(6 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getVelocity();
     }
-  q.head(7) << state_.pos_, state_.quat_;
-  v.head(6) << state_.linear_vel_, state_.angular_vel_;
+  q.head(7) << robot_state_.pos_, robot_state_.quat_.coeffs();
+  v.head(6) << robot_state_.linear_vel_, robot_state_.angular_vel_;
+
+  if (state_estimate_ != nullptr)
+    state_estimate_->update(robot_state_);
 
   pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
   pinocchio::computeJointJacobians(*pin_model_, *pin_data_);
@@ -66,8 +71,8 @@ void ControllerBase::updateData(const ros::Time& time, const ros::Duration& peri
   for (int leg = 0; leg < 4; ++leg)
   {
     pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
-    state_.foot_pos_[leg] = pin_data_->oMf[frame_id].translation();
-    state_.foot_vel_[leg] =
+    robot_state_.foot_pos_[leg] = pin_data_->oMf[frame_id].translation();
+    robot_state_.foot_vel_[leg] =
         pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED)
             .linear();
   }
@@ -97,8 +102,8 @@ void ControllerBase::updateCommand(const ros::Time& time, const ros::Duration& p
   {
     Eigen::Vector3d foot_force = leg_cmd_[leg].ff_cartesian_;
     // cartesian PD
-    foot_force += leg_cmd_[leg].kp_cartesian_ * (leg_cmd_[leg].foot_pos_des_ - state_.foot_pos_[leg]);
-    foot_force += leg_cmd_[leg].kd_cartesian_ * (leg_cmd_[leg].foot_vel_des_ - state_.foot_vel_[leg]);
+    foot_force += leg_cmd_[leg].kp_cartesian_ * (leg_cmd_[leg].foot_pos_des_ - robot_state_.foot_pos_[leg]);
+    foot_force += leg_cmd_[leg].kd_cartesian_ * (leg_cmd_[leg].foot_vel_des_ - robot_state_.foot_vel_[leg]);
     Eigen::Matrix<double, 6, 18> jac;
     pinocchio::getFrameJacobian(*pin_model_, *pin_data_, pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot"),
                                 pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, jac);
@@ -134,12 +139,12 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
     {
       for (int leg = 0; leg < 4; ++leg)
       {
-        state_pub_->msg_.foot_pos[leg].x = state_.foot_pos_[leg].x();
-        state_pub_->msg_.foot_pos[leg].y = state_.foot_pos_[leg].y();
-        state_pub_->msg_.foot_pos[leg].z = state_.foot_pos_[leg].z();
-        state_pub_->msg_.foot_vel[leg].x = state_.foot_vel_[leg].x();
-        state_pub_->msg_.foot_vel[leg].y = state_.foot_vel_[leg].y();
-        state_pub_->msg_.foot_vel[leg].z = state_.foot_vel_[leg].z();
+        state_pub_->msg_.foot_pos[leg].x = robot_state_.foot_pos_[leg].x();
+        state_pub_->msg_.foot_pos[leg].y = robot_state_.foot_pos_[leg].y();
+        state_pub_->msg_.foot_pos[leg].z = robot_state_.foot_pos_[leg].z();
+        state_pub_->msg_.foot_vel[leg].x = robot_state_.foot_vel_[leg].x();
+        state_pub_->msg_.foot_vel[leg].y = robot_state_.foot_vel_[leg].y();
+        state_pub_->msg_.foot_vel[leg].z = robot_state_.foot_vel_[leg].z();
       }
       state_pub_->unlockAndPublish();
     }
