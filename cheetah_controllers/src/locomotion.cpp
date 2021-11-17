@@ -10,14 +10,12 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
 {
   if (!FeetController::init(robot_hw, controller_nh))
     return false;
-  state_estimate_ = std::make_shared<GroundTruth>(controller_nh);
   return true;
 }
 
 void LocomotionController::updateData(const ros::Time& time, const ros::Duration& period)
 {
-  setBaseState(state_estimate_->getState());
-  LegsController::updateData(time, period);
+  ControllerBase::updateData(time, period);
 }
 
 }  // namespace unitree_ros
