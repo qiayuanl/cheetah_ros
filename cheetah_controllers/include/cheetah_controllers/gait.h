@@ -9,26 +9,23 @@
 
 namespace unitree_ros
 {
+template <typename T>
 class OffsetDurationGait
 {
 public:
-  OffsetDurationGait(int segment, double gait_cycle, const Vec4<int>& offsets, const Vec4<int>& durations)
-    : segment_(segment)
-    , gait_cycle_(gait_cycle)
-    , mpc_dt_(gait_cycle / static_cast<double>(segment_))
-    , offsets_(offsets)
-    , durations_(durations)
-    , offsets_phase_(offsets.cast<double>() / (double)segment_)
-    , durations_phase_(durations.cast<double>() / (double)segment_)
+  OffsetDurationGait(int segment, T gait_cycle, const Vec4<T>& offsets, const Vec4<T>& durations)
+    : segment_(segment), mpc_dt_(gait_cycle / static_cast<T>(segment_)), offsets_(offsets), durations_(durations)
   {
   }
+
   ~OffsetDurationGait()
   {
     delete[] mpc_table_;
   }
+
   void update(const ros::Time time)
   {
-    iteration_ = static_cast<int>(std::fmod(time.toSec() / mpc_dt_, segment_));
+    iteration_ = std::fmod(time.toSec() / mpc_dt_, segment_);
   }
 
   int* getMpcTable()
@@ -50,15 +47,36 @@ public:
     return mpc_table_;
   }
 
+  Vec4<int> getContactState()
+  {
+    Vec4<int> state;
+
+    for (int i = 0; i < 4; i++)
+    {
+      int progress = iteration_ - offsets_[i] * segment_;
+      if (progress < 0)
+        progress += segment_;
+      if (progress > durations_[i] * segment_)
+        progress = 0;
+      else
+        progress = 1;
+      state[i] = progress;
+    }
+    return state;
+  }
+
+  Vec4<T> getSwingTime()
+  {
+    return durations_ * mpc_dt_ * segment_;
+  }
+
 private:
   int segment_, iteration_;
-  double gait_cycle_, mpc_dt_;
+  T mpc_dt_;
   int* mpc_table_;
 
-  Eigen::Array4i offsets_;          // offset in mpc segments
-  Eigen::Array4i durations_;        // duration of step in mpc segments
-  Eigen::Array4d offsets_phase_;    // offsets in phase (0 to 1)
-  Eigen::Array4d durations_phase_;  // durations in phase (0 to 1)
+  Eigen::Array4d offsets_;    // offset in mpc segments
+  Eigen::Array4d durations_;  // duration of step in mpc segments
 };
 
 }  // namespace unitree_ros

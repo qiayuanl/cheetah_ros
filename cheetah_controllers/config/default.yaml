@@ -5,7 +5,7 @@ controllers:
   locomotion_controller:
     type: unitree_ros/LocomotionController
     feet:
-      kp_stand: [ 1000., 1000., 1000. ]
-      kd_stand: [ 10., 10., 10. ]
+      kp_stand: [ 50., 50., 50. ]
+      kd_stand: [ 2.5, 2.5, 2.5 ]
       kp_swing: [ 700., 700., 150. ]
       kd_swing: [ 7., 7., 7. ]
