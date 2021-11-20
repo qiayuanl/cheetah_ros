@@ -67,15 +67,20 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
     if (states_[leg].touch_state_ == SWING && states_[leg].swing_time_ > 1e-3)
     {
       LegCmd leg_cmd;
+      leg_cmd.kp_cartesian_ = k.kp_swing_;
+      leg_cmd.kd_cartesian_ = k.kd_swing_;
       states_[leg].phase_ += period.toSec() / states_[leg].swing_time_;
       if (states_[leg].phase_ > 1.)
         states_[leg].phase_ = 1.;
+
       swing_trajectory_[leg].computeSwingTrajectoryBezier(states_[leg].phase_, states_[leg].swing_time_);
       leg_cmd.stamp_ = time;
       leg_cmd.foot_pos_des_ = swing_trajectory_[leg].getPosition();
       leg_cmd.foot_vel_des_ = swing_trajectory_[leg].getVelocity();
-      leg_cmd.kp_cartesian_ = k.kp_swing_;
-      leg_cmd.kd_cartesian_ = k.kd_swing_;
+
+      Eigen::Vector3d force;
+      force.setZero();
+      leg_cmd.ff_cartesian_ = force;
       setLegCmd(LegPrefix(leg), leg_cmd);
     }
   }

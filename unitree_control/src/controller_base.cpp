@@ -50,6 +50,9 @@ void ControllerBase::update(const ros::Time& time, const ros::Duration& period)
 
 void ControllerBase::updateData(const ros::Time& time, const ros::Duration& period)
 {
+  if (state_estimate_ != nullptr)
+    state_estimate_->update(robot_state_);
+
   Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
   for (int leg = 0; leg < 4; ++leg)
     for (int joint = 0; joint < 3; ++joint)
@@ -61,9 +64,6 @@ void ControllerBase::updateData(const ros::Time& time, const ros::Duration& peri
     }
   q.head(7) << robot_state_.pos_, robot_state_.quat_.coeffs();
   v.head(6) << robot_state_.linear_vel_, robot_state_.angular_vel_;
-
-  if (state_estimate_ != nullptr)
-    state_estimate_->update(robot_state_);
 
   pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
   pinocchio::computeJointJacobians(*pin_model_, *pin_data_);
