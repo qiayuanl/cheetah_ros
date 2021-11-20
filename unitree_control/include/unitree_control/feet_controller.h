@@ -33,7 +33,7 @@ public:
   FeetController() = default;
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
   void updateCommand(const ros::Time& time, const ros::Duration& period) override;
-  State& getFootState(LegPrefix leg);
+  TouchState getFootState(LegPrefix leg);
   void setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double height, double swing_time);
   void setStand(LegPrefix leg, const Eigen::Vector3d& force);
 

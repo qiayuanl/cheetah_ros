@@ -64,7 +64,7 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
   K k = *k_buffer.readFromRT();
   for (int leg = 0; leg < 4; ++leg)
   {
-    if (states_[leg].touch_state_ == SWING)
+    if (states_[leg].touch_state_ == SWING && states_[leg].swing_time_ > 1e-3)
     {
       LegCmd leg_cmd;
       states_[leg].phase_ += period.toSec() / states_[leg].swing_time_;
@@ -82,9 +82,9 @@ void FeetController::updateCommand(const ros::Time& time, const ros::Duration& p
   ControllerBase::updateCommand(time, period);
 }
 
-FeetController::State& FeetController::getFootState(LegPrefix leg)
+FeetController::TouchState FeetController::getFootState(LegPrefix leg)
 {
-  return states_[leg];
+  return states_[leg].touch_state_;
 }
 
 void FeetController::setSwing(LegPrefix leg, const Eigen::Vector3d& final_pos, double height, double swing_time)
