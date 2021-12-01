@@ -20,10 +20,10 @@ public:
     mpc_table_ = new int[segment_ * 4];
   }
 
-  ~OffsetDurationGait()
-  {
-    delete[] mpc_table_;
-  }
+  //  ~OffsetDurationGait()
+  //  {
+  //    delete[] mpc_table_;
+  //  }
 
   void update(const ros::Time time)
   {
@@ -100,12 +100,12 @@ class OffsetDurationGaitRos : public OffsetDurationGait<T>
 {
 public:
   OffsetDurationGaitRos<T>(XmlRpc::XmlRpcValue& params, int segment)
+    : OffsetDurationGait<T>(segment, xmlRpcGetDouble(params["cycle"]), getVec4(params, "offsets"),
+                            getVec4(params, "durations"))
   {
     ROS_ASSERT(params.hasMember("cycle"));
     ROS_ASSERT(params.hasMember("offsets"));
     ROS_ASSERT(params.hasMember("durations"));
-    OffsetDurationGait<T>(segment, xmlRpcGetDouble(params["cycle"]), getVec4(params, "offsets"),
-                          getVec4(params, "durations"));
   }
 
 private:
@@ -113,7 +113,7 @@ private:
   {
     Vec4<T> array;
     if (params.hasMember(name))
-      if (params.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      if (params[name].getType() == XmlRpc::XmlRpcValue::TypeArray)
       {
         if (params[name].size() == 4)
           array << xmlRpcGetDouble(params[name], 0), xmlRpcGetDouble(params[name], 1), xmlRpcGetDouble(params[name], 2),

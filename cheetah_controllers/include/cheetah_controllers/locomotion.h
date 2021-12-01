@@ -15,8 +15,10 @@ public:
   LocomotionController() = default;
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh) override;
   void updateData(const ros::Time& time, const ros::Duration& period) override;
+  void updateCommand(const ros::Time& time, const ros::Duration& period) override;
 
 protected:
+  std::map<std::string, OffsetDurationGaitRos<double>> name2gaits_;
 };
 
 }  // namespace unitree_ros

@@ -11,6 +11,12 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
 {
   if (!FeetController::init(robot_hw, controller_nh))
     return false;
+  XmlRpc::XmlRpcValue gaits_params;
+  controller_nh.getParam("gaits", gaits_params);
+  ROS_ASSERT(gaits_params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+  for (auto gait_params : gaits_params)
+    name2gaits_.insert(std::make_pair<std::string, OffsetDurationGaitRos<double>>(
+        gait_params.first.c_str(), OffsetDurationGaitRos<double>(gait_params.second, 10)));
   return true;
 }
 
