@@ -77,7 +77,7 @@ const MatrixXd& MpcFormulation::getConstrainMat()
   return c_;
 }
 
-const VectorXd& MpcFormulation::getUpperBound(const RobotState& state)
+const VectorXd& MpcFormulation::getUpperBound(const VectorXd& gait_table)
 {
   for (int i = 0; i < config_.horizon_; ++i)
   {
@@ -89,7 +89,7 @@ const VectorXd& MpcFormulation::getUpperBound(const RobotState& state)
       u_b_(row + 1) = big_value;
       u_b_(row + 2) = big_value;
       u_b_(row + 3) = big_value;
-      u_b_(row + 4) = config_.f_max_ * state.contact_state_(j);
+      u_b_(row + 4) = config_.f_max_ * gait_table(i * 4 + j);
     }
   }
   return u_b_;

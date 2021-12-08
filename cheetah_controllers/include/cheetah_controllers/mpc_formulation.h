@@ -43,7 +43,7 @@ public:
   const MatrixXd& getHessianMat();
   const VectorXd& getGVec(const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
   const MatrixXd& getConstrainMat();
-  const VectorXd& getUpperBound(const RobotState& state);
+  const VectorXd& getUpperBound(const VectorXd& gait_table);
   const VectorXd& getLowerBound();
 
 private:

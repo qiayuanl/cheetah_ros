@@ -15,39 +15,36 @@ class OffsetDurationGait
 {
 public:
   using Ptr = std::shared_ptr<OffsetDurationGait>;
-  OffsetDurationGait(int segment, T cycle, const Vec4<T>& offsets, const Vec4<T>& durations)
-    : segment_(segment), mpc_dt_(cycle / static_cast<T>(segment_)), offsets_(offsets), durations_(durations)
+  OffsetDurationGait(T cycle, const Vec4<T>& offsets, const Vec4<T>& durations)
+    : cycle_(cycle), offsets_(offsets), durations_(durations)
   {
-    mpc_table_ = new int[segment_ * 4];
-  }
-
-  ~OffsetDurationGait()
-  {
-    delete[] mpc_table_;
   }
 
   void update(const ros::Time time)
   {
-    iteration_ = std::fmod(time.toSec() / mpc_dt_, segment_);
+    phase_ = std::fmod(time.toSec() / cycle_, 1.);
   }
 
-  int* getMpcTable()
+  DVec<T> getMpcTable(int horizon)
   {
-    for (int i = 0; i < segment_; i++)
+    DVec<T> mpc_table(4 * horizon);
+    int iteration = std::fmod(phase_ / (cycle_ / horizon), horizon);
+
+    for (int i = 0; i < horizon; i++)
     {
-      int iter = (i + iteration_ + 1) % segment_;
+      int iter = (i + iteration + 1) % horizon;
       for (int j = 0; j < 4; j++)
       {
-        int progress = iter - offsets_[i] * segment_;
+        int progress = iter - offsets_[i] * horizon;
         if (progress < 0)
-          progress += segment_;
-        if (progress > durations_[i] * segment_)
-          mpc_table_[i * 4 + j] = 0;
+          progress += 1.;
+        if (progress > durations_[i] * horizon)
+          mpc_table[i * 4 + j] = 0;
         else
-          mpc_table_[i * 4 + j] = 1;
+          mpc_table[i * 4 + j] = 1;
       }
     }
-    return mpc_table_;
+    return mpc_table;
   }
 
   Vec4<int> getContactState()
@@ -56,10 +53,10 @@ public:
 
     for (int i = 0; i < 4; i++)
     {
-      int progress = iteration_ - offsets_[i] * segment_;
+      T progress = phase_ - offsets_[i];
       if (progress < 0)
-        progress += segment_;
-      if (progress > durations_[i] * segment_)
+        progress += 1.;
+      if (progress > durations_[i])
         progress = 0;
       else
         progress = 1;
@@ -70,27 +67,18 @@ public:
 
   Vec4<T> getSwingTime()
   {
-    return durations_ * mpc_dt_ * segment_;
+    Vec4<T> ones;
+    ones.setOnes();
+    return (ones - durations_) * cycle_;
   }
 
   Vec4<T> getStandTime()
   {
-    Vec4<T> ones;
-    ones.setOnes();
-    return (ones - durations_) * mpc_dt_ * segment_;
-  }
-
-  void resizeSegment(int segment)
-  {
-    delete[] mpc_table_;
-    segment_ = segment;
-    mpc_table_ = new int[segment_ * 4];
+    return durations_ * cycle_;
   }
 
 private:
-  int segment_, iteration_;
-  T mpc_dt_;
-  int* mpc_table_;
+  T cycle_, phase_;
 
   Vec4<T> offsets_;    // offset in 0.0 ~ 1.0
   Vec4<T> durations_;  // duration of step in 0.0 ~ 1.0
@@ -100,9 +88,8 @@ template <typename T>
 class OffsetDurationGaitRos : public OffsetDurationGait<T>
 {
 public:
-  OffsetDurationGaitRos<T>(XmlRpc::XmlRpcValue& params, int segment)
-    : OffsetDurationGait<T>(segment, xmlRpcGetDouble(params["cycle"]), getVec4(params, "offsets"),
-                            getVec4(params, "durations"))
+  OffsetDurationGaitRos<T>(XmlRpc::XmlRpcValue& params)
+    : OffsetDurationGait<T>(xmlRpcGetDouble(params["cycle"]), getVec4(params, "offsets"), getVec4(params, "durations"))
   {
     ROS_ASSERT(params.hasMember("cycle"));
     ROS_ASSERT(params.hasMember("offsets"));

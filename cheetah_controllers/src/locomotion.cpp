@@ -15,8 +15,8 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
   controller_nh.getParam("gaits", gaits_params);
   ROS_ASSERT(gaits_params.getType() == XmlRpc::XmlRpcValue::TypeStruct);
   for (auto gait_params : gaits_params)
-    name2gaits_.insert(std::make_pair(gait_params.first.c_str(),
-                                      std::make_shared<OffsetDurationGaitRos<double>>(gait_params.second, 10)));
+    name2gaits_.insert(
+        std::make_pair(gait_params.first.c_str(), std::make_shared<OffsetDurationGaitRos<double>>(gait_params.second)));
   return true;
 }
 
