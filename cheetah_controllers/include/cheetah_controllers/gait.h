@@ -14,16 +14,17 @@ template <typename T>
 class OffsetDurationGait
 {
 public:
+  using Ptr = std::shared_ptr<OffsetDurationGait>;
   OffsetDurationGait(int segment, T cycle, const Vec4<T>& offsets, const Vec4<T>& durations)
     : segment_(segment), mpc_dt_(cycle / static_cast<T>(segment_)), offsets_(offsets), durations_(durations)
   {
     mpc_table_ = new int[segment_ * 4];
   }
 
-  //  ~OffsetDurationGait()
-  //  {
-  //    delete[] mpc_table_;
-  //  }
+  ~OffsetDurationGait()
+  {
+    delete[] mpc_table_;
+  }
 
   void update(const ros::Time time)
   {

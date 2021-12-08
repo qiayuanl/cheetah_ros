@@ -18,7 +18,7 @@ public:
   void updateCommand(const ros::Time& time, const ros::Duration& period) override;
 
 protected:
-  std::map<std::string, OffsetDurationGaitRos<double>> name2gaits_;
+  std::map<std::string, OffsetDurationGaitRos<double>::Ptr> name2gaits_;
 };
 
 }  // namespace unitree_ros
