@@ -10,11 +10,9 @@
 
 namespace unitree_ros
 {
-void MpcFormulation::setConfig(const MpcFormulation::Config& config)
+void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
 {
-  config_ = config;
   // Resize
-  int horizon = config_.horizon_;
   a_qp_.resize(STATE_DIM * horizon, Eigen::NoChange);
   b_qp_.resize(STATE_DIM * horizon, ACTION_DIM * horizon);
   l_.resize(STATE_DIM * horizon);
@@ -24,23 +22,7 @@ void MpcFormulation::setConfig(const MpcFormulation::Config& config)
   u_b_.resize(5 * 4 * horizon, Eigen::NoChange);
   l_b_.resize(5 * 4 * horizon, Eigen::NoChange);
 
-  // Weight
-  Matrix<double, STATE_DIM, 1> full_weight;
-  for (int i = 0; i < STATE_DIM - 1; i++)
-    full_weight(i) = config_.weight_[i];
-  full_weight(12) = 0.f;
-  l_.diagonal() = full_weight.replicate(horizon, 1);
-}
-
-void MpcFormulation::updateModel(const RobotState& state)
-{
-  Matrix3d rot;  // TODO: convert from quat
-  Matrix<double, 3, 4> r_feet;
-  for (int i = 0; i < 4; ++i)
-    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
-
-  buildStateSpace(rot, r_feet, a_c_, b_c_);
-  buildQp(a_c_, b_c_, a_qp_, b_qp_);
+  l_.diagonal() = weight.replicate(horizon, 1);
 }
 
 const MatrixXd& MpcFormulation::getHessianMat()
@@ -49,37 +31,36 @@ const MatrixXd& MpcFormulation::getHessianMat()
   return h_;
 }
 
-const VectorXd& MpcFormulation::getGVec(const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
+const VectorXd& MpcFormulation::getGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
 {
   // Update x_0 and x_ref
   Vector3d rpy;  // TODO: convert from quat
   rpy.setZero();
   Matrix<double, STATE_DIM, 1> x_0;
-  VectorXd x_ref(STATE_DIM * config_.horizon_);
-  x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, config_.gravity_;
-  for (int i = 0; i < config_.horizon_; i++)
+  VectorXd x_ref(STATE_DIM * horizon_);
+  x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, gravity;
+  for (int i = 0; i < horizon_; i++)
     for (int j = 0; j < STATE_DIM - 1; j++)
       x_ref(STATE_DIM * i + j, 0) = traj[12 * i + j];
 
-  // Calculate Hessian and g
   g_ = 2. * b_qp_.transpose() * l_ * (a_qp_ * x_0 - x_ref);
   return g_;
 }
 
-const MatrixXd& MpcFormulation::getConstrainMat()
+const MatrixXd& MpcFormulation::getConstrainMat(double mu)
 {
   c_.setZero();
-  double mu_inv = 1.f / config_.mu_;
+  double mu_inv = 1.f / mu;
   Matrix<double, 5, 3> c_block;
   c_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
-  for (int i = 0; i < config_.horizon_ * 4; i++)
+  for (int i = 0; i < horizon_ * 4; i++)
     c_.block(i * 5, i * 3, 5, 3) = c_block;
   return c_;
 }
 
-const VectorXd& MpcFormulation::getUpperBound(const VectorXd& gait_table)
+const VectorXd& MpcFormulation::getUpperBound(double f_max, const VectorXd& gait_table)
 {
-  for (int i = 0; i < config_.horizon_; ++i)
+  for (int i = 0; i < horizon_; ++i)
   {
     for (int j = 0; j < 4; ++j)
     {
@@ -89,7 +70,7 @@ const VectorXd& MpcFormulation::getUpperBound(const VectorXd& gait_table)
       u_b_(row + 1) = big_value;
       u_b_(row + 2) = big_value;
       u_b_(row + 3) = big_value;
-      u_b_(row + 4) = config_.f_max_ * gait_table(i * 4 + j);
+      u_b_(row + 4) = f_max * gait_table(i * 4 + j);
     }
   }
   return u_b_;
@@ -113,11 +94,16 @@ Matrix3d convertToSkewSymmetric(const Vector3d& vec)
   return skew_sym_mat;
 }
 
-void MpcFormulation::buildStateSpace(const Matrix3d& rot_yaw, const Matrix<double, 3, 4>& r_feet,
+void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state,
                                      Matrix<double, STATE_DIM, STATE_DIM>& a, Matrix<double, STATE_DIM, ACTION_DIM>& b)
 {
+  Matrix3d rot;  // TODO: convert from quat
+  Matrix<double, 3, 4> r_feet;
+  for (int i = 0; i < 4; ++i)
+    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
+
   a.setZero();
-  a.block<3, 3>(0, 6) = rot_yaw.transpose();
+  a.block<3, 3>(0, 6) = rot.transpose();
 
   a(3, 9) = 1.;
   a(4, 10) = 1.;
@@ -127,12 +113,12 @@ void MpcFormulation::buildStateSpace(const Matrix3d& rot_yaw, const Matrix<doubl
   //  b contains non_zero elements only in row 6 : 12.
   for (int i = 0; i < 4; ++i)
   {
-    b.block<3, 3>(6, i * 3) = config_.inertia_.inverse() * convertToSkewSymmetric(r_feet.col(i));
-    b.block(9, i * 3, 3, 3) = Matrix<double, 3, 3>::Identity() / config_.mass_;
+    b.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
+    b.block(9, i * 3, 3, 3) = Matrix<double, 3, 3>::Identity() / mass;
   }
 }
 
-void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
+void MpcFormulation::buildQp(double dt, const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
                              const Matrix<double, STATE_DIM, ACTION_DIM>& b_c, Matrix<double, Dynamic, STATE_DIM>& a_qp,
                              MatrixXd& b_qp)
 {
@@ -140,7 +126,7 @@ void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
   Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_c;
   ab_c.block(0, 0, STATE_DIM, STATE_DIM) = a_c;
   ab_c.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) = b_c;
-  ab_c = config_.dt_ * ab_c;
+  ab_c = dt * ab_c;
   Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> exp = ab_c.exp();
   Matrix<double, STATE_DIM, STATE_DIM> a_dt = exp.block(0, 0, STATE_DIM, STATE_DIM);
   Matrix<double, STATE_DIM, ACTION_DIM> b_dt = exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
@@ -148,13 +134,13 @@ void MpcFormulation::buildQp(const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
   Matrix<double, STATE_DIM, STATE_DIM> power_mat[20];
 
   power_mat[0].setIdentity();
-  for (int i = 1; i < config_.horizon_ + 1; i++)
+  for (int i = 1; i < horizon_ + 1; i++)
     power_mat[i] = a_dt * power_mat[i - 1];
 
-  for (int r = 0; r < config_.horizon_; r++)
+  for (int r = 0; r < horizon_; r++)
   {
     a_qp.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat[r + 1];  // Adt.pow(r+1);
-    for (int c = 0; c < config_.horizon_; c++)
+    for (int c = 0; c < horizon_; c++)
     {
       if (r >= c)
       {
