@@ -7,12 +7,15 @@
 #include "cheetah_controllers/mpc_formulation.h"
 
 #include <unsupported/Eigen/MatrixFunctions>
-
+#include <iostream>
 namespace unitree_ros
 {
 void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
 {
+  horizon_ = horizon;
   // Resize
+  a_c_.resize(STATE_DIM, STATE_DIM);
+  b_c_.resize(STATE_DIM, ACTION_DIM);
   a_qp_.resize(STATE_DIM * horizon, Eigen::NoChange);
   b_qp_.resize(STATE_DIM * horizon, ACTION_DIM * horizon);
   l_.resize(STATE_DIM * horizon);
@@ -21,7 +24,6 @@ void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
   u_b_.resize(5 * 4 * horizon, Eigen::NoChange);
   l_b_.resize(5 * 4 * horizon, Eigen::NoChange);
-
   l_.diagonal() = weight.replicate(horizon, 1);
 }
 
@@ -40,9 +42,10 @@ Matrix3d convertToSkewSymmetric(const Vector3d& vec)
 void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state)
 {
   Matrix3d rot;  // TODO: convert from quat
+  rot << 1, 0, 0, 0, 1, 0, 0, 0, 1;
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
-    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
+    r_feet.col(i) = state.foot_pos_[i] - state.pos_;
 
   a_c_.setZero();
   a_c_.block<3, 3>(0, 6) = rot.transpose();
@@ -53,6 +56,7 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   a_c_(11, 12) = 1.;
 
   //  b contains non_zero elements only in row 6 : 12.
+  b_c_.setZero();
   for (int i = 0; i < 4; ++i)
   {
     b_c_.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
@@ -71,25 +75,25 @@ void MpcFormulation::buildQp(double dt)
   Matrix<double, STATE_DIM, STATE_DIM> a_dt = exp.block(0, 0, STATE_DIM, STATE_DIM);
   Matrix<double, STATE_DIM, ACTION_DIM> b_dt = exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
 
-  Matrix<double, STATE_DIM, STATE_DIM> power_mat[20];
-
-  power_mat[0].setIdentity();
+  power_mat_[0].setIdentity();
   for (int i = 1; i < horizon_ + 1; i++)
-    power_mat[i] = a_dt * power_mat[i - 1];
+    power_mat_[i] = a_dt * power_mat_[i - 1];
 
   for (int r = 0; r < horizon_; r++)
   {
-    a_qp_.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat[r + 1];  // Adt.pow(r+1);
+    a_qp_.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat_[r + 1];  // Adt.pow(r+1);
+
     for (int c = 0; c < horizon_; c++)
     {
       if (r >= c)
       {
         int a_num = r - c;
-        b_qp_.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mat[a_num] * b_dt;
+        b_qp_.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mat_[a_num] * b_dt;
       }
     }
   }
 }
+
 const MatrixXd& MpcFormulation::getHessianMat()
 {
   h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
