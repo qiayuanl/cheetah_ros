@@ -72,4 +72,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_options(${PROJECT_NAME} PUBLIC ${FLAGS})
 
+add_executable(mpc_formulation_test test/mpc_formulation_test.cpp)
+target_link_libraries(mpc_formulation_test
+        ${catkin_LIBRARIES}
+        ${PROJECT_NAME}
+        )
+
 roslint_cpp()

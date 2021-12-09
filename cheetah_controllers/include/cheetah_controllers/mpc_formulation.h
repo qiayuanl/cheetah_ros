@@ -27,11 +27,8 @@ public:
 
   void setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight);
 
-  void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state,
-                       Matrix<double, STATE_DIM, STATE_DIM>& a, Matrix<double, STATE_DIM, ACTION_DIM>& b);
-  void buildQp(double dt, const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
-               const Matrix<double, STATE_DIM, ACTION_DIM>& b_c, Matrix<double, Dynamic, STATE_DIM>& a_qp,
-               MatrixXd& b_qp);
+  void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
+  void buildQp(double dt);
 
   const MatrixXd& getHessianMat();
   const VectorXd& getGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj);

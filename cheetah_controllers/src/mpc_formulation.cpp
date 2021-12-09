@@ -25,6 +25,71 @@ void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   l_.diagonal() = weight.replicate(horizon, 1);
 }
 
+// Converts a vector to the skew symmetric matrix form. For an input vector
+// [a, b, c], the output matrix would be:
+//   [ 0, -c,  b]
+//   [ c,  0, -a]
+//   [-b,  a,  0]
+Matrix3d convertToSkewSymmetric(const Vector3d& vec)
+{
+  Matrix3d skew_sym_mat;
+  skew_sym_mat << 0, -vec(2), vec(1), vec(2), 0, -vec(0), -vec(1), vec(0), 0;
+  return skew_sym_mat;
+}
+
+void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state)
+{
+  Matrix3d rot;  // TODO: convert from quat
+  Matrix<double, 3, 4> r_feet;
+  for (int i = 0; i < 4; ++i)
+    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
+
+  a_c_.setZero();
+  a_c_.block<3, 3>(0, 6) = rot.transpose();
+
+  a_c_(3, 9) = 1.;
+  a_c_(4, 10) = 1.;
+  a_c_(5, 11) = 1.;
+  a_c_(11, 12) = 1.;
+
+  //  b contains non_zero elements only in row 6 : 12.
+  for (int i = 0; i < 4; ++i)
+  {
+    b_c_.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
+    b_c_.block(9, i * 3, 3, 3) = Matrix<double, 3, 3>::Identity() / mass;
+  }
+}
+
+void MpcFormulation::buildQp(double dt)
+{
+  // Convert model from continuous to discrete time
+  Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_c;
+  ab_c.block(0, 0, STATE_DIM, STATE_DIM) = a_c_;
+  ab_c.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) = b_c_;
+  ab_c = dt * ab_c;
+  Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> exp = ab_c.exp();
+  Matrix<double, STATE_DIM, STATE_DIM> a_dt = exp.block(0, 0, STATE_DIM, STATE_DIM);
+  Matrix<double, STATE_DIM, ACTION_DIM> b_dt = exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
+
+  Matrix<double, STATE_DIM, STATE_DIM> power_mat[20];
+
+  power_mat[0].setIdentity();
+  for (int i = 1; i < horizon_ + 1; i++)
+    power_mat[i] = a_dt * power_mat[i - 1];
+
+  for (int r = 0; r < horizon_; r++)
+  {
+    a_qp_.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat[r + 1];  // Adt.pow(r+1);
+    for (int c = 0; c < horizon_; c++)
+    {
+      if (r >= c)
+      {
+        int a_num = r - c;
+        b_qp_.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mat[a_num] * b_dt;
+      }
+    }
+  }
+}
 const MatrixXd& MpcFormulation::getHessianMat()
 {
   h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
@@ -80,75 +145,6 @@ const VectorXd& MpcFormulation::getLowerBound()
 {
   l_b_.setZero();
   return l_b_;
-}
-
-// Converts a vector to the skew symmetric matrix form. For an input vector
-// [a, b, c], the output matrix would be:
-//   [ 0, -c,  b]
-//   [ c,  0, -a]
-//   [-b,  a,  0]
-Matrix3d convertToSkewSymmetric(const Vector3d& vec)
-{
-  Matrix3d skew_sym_mat;
-  skew_sym_mat << 0, -vec(2), vec(1), vec(2), 0, -vec(0), -vec(1), vec(0), 0;
-  return skew_sym_mat;
-}
-
-void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state,
-                                     Matrix<double, STATE_DIM, STATE_DIM>& a, Matrix<double, STATE_DIM, ACTION_DIM>& b)
-{
-  Matrix3d rot;  // TODO: convert from quat
-  Matrix<double, 3, 4> r_feet;
-  for (int i = 0; i < 4; ++i)
-    r_feet.col(i) = state.foot_pos_[i].col(i) - state.pos_;
-
-  a.setZero();
-  a.block<3, 3>(0, 6) = rot.transpose();
-
-  a(3, 9) = 1.;
-  a(4, 10) = 1.;
-  a(5, 11) = 1.;
-  a(11, 12) = 1.;
-
-  //  b contains non_zero elements only in row 6 : 12.
-  for (int i = 0; i < 4; ++i)
-  {
-    b.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
-    b.block(9, i * 3, 3, 3) = Matrix<double, 3, 3>::Identity() / mass;
-  }
-}
-
-void MpcFormulation::buildQp(double dt, const Matrix<double, STATE_DIM, STATE_DIM>& a_c,
-                             const Matrix<double, STATE_DIM, ACTION_DIM>& b_c, Matrix<double, Dynamic, STATE_DIM>& a_qp,
-                             MatrixXd& b_qp)
-{
-  // Convert model from continuous to discrete time
-  Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_c;
-  ab_c.block(0, 0, STATE_DIM, STATE_DIM) = a_c;
-  ab_c.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) = b_c;
-  ab_c = dt * ab_c;
-  Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> exp = ab_c.exp();
-  Matrix<double, STATE_DIM, STATE_DIM> a_dt = exp.block(0, 0, STATE_DIM, STATE_DIM);
-  Matrix<double, STATE_DIM, ACTION_DIM> b_dt = exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
-
-  Matrix<double, STATE_DIM, STATE_DIM> power_mat[20];
-
-  power_mat[0].setIdentity();
-  for (int i = 1; i < horizon_ + 1; i++)
-    power_mat[i] = a_dt * power_mat[i - 1];
-
-  for (int r = 0; r < horizon_; r++)
-  {
-    a_qp.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat[r + 1];  // Adt.pow(r+1);
-    for (int c = 0; c < horizon_; c++)
-    {
-      if (r >= c)
-      {
-        int a_num = r - c;
-        b_qp.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mat[a_num] * b_dt;
-      }
-    }
-  }
 }
 
 }  // namespace unitree_ros
