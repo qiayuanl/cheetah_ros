@@ -22,7 +22,8 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
     if (urdf_string.empty())
       return false;
     pin_model_ = std::make_shared<pinocchio::Model>();
-    pinocchio::urdf::buildModel(urdf::parseURDF(urdf_string), pinocchio::JointModelFreeFlyer(), *pin_model_);
+    urdf_ = urdf::parseURDF(urdf_string);
+    pinocchio::urdf::buildModel(urdf_, pinocchio::JointModelFreeFlyer(), *pin_model_);
     pin_data_ = std::make_shared<pinocchio::Data>(*pin_model_);
   }
   // Setup joint handles. Ignore id 0 (universe joint) and id 1 (root joint).

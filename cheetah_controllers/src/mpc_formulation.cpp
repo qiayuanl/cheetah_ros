@@ -7,7 +7,7 @@
 #include "cheetah_controllers/mpc_formulation.h"
 
 #include <unsupported/Eigen/MatrixFunctions>
-#include <iostream>
+
 namespace unitree_ros
 {
 void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
@@ -97,13 +97,14 @@ void MpcFormulation::buildQp(double dt)
   }
 }
 
-const MatrixXd& MpcFormulation::getHessianMat()
+const MatrixXd& MpcFormulation::buildHessianMat()
 {
   h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
   return h_;
 }
 
-const VectorXd& MpcFormulation::getGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj)
+const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& state,
+                                          const Matrix<double, Dynamic, 1>& traj)
 {
   // Update x_0 and x_ref
   Vector3d rpy;  // TODO: convert from quat
@@ -119,7 +120,7 @@ const VectorXd& MpcFormulation::getGVec(double gravity, const RobotState& state,
   return g_;
 }
 
-const MatrixXd& MpcFormulation::getConstrainMat(double mu)
+const MatrixXd& MpcFormulation::buildConstrainMat(double mu)
 {
   c_.setZero();
   double mu_inv = 1.f / mu;
@@ -130,7 +131,7 @@ const MatrixXd& MpcFormulation::getConstrainMat(double mu)
   return c_;
 }
 
-const VectorXd& MpcFormulation::getUpperBound(double f_max, const VectorXd& gait_table)
+const VectorXd& MpcFormulation::buildUpperBound(double f_max, const VectorXd& gait_table)
 {
   for (int i = 0; i < horizon_; ++i)
   {
@@ -148,7 +149,7 @@ const VectorXd& MpcFormulation::getUpperBound(double f_max, const VectorXd& gait
   return u_b_;
 }
 
-const VectorXd& MpcFormulation::getLowerBound()
+const VectorXd& MpcFormulation::buildLowerBound()
 {
   l_b_.setZero();
   return l_b_;

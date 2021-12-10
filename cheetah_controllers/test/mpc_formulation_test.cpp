@@ -47,8 +47,8 @@ int main()
             << " second" << endl;
 
   start = system_clock::now();
-  mpc_formulation.getHessianMat();
-  std::cout << "getHessianMat spend "
+  mpc_formulation.buildHessianMat();
+  std::cout << "buildHessianMat spend "
             << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
                    microseconds::period::den
             << " second" << endl;
@@ -57,8 +57,8 @@ int main()
   traj.resize(MpcFormulation::STATE_DIM * horizon);
   traj.setZero();
   start = system_clock::now();
-  mpc_formulation.getGVec(9.81, state, traj);
-  std::cout << "getGVec spend "
+  mpc_formulation.buildGVec(9.81, state, traj);
+  std::cout << "buildGVec spend "
             << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
                    microseconds::period::den
             << " second" << endl;

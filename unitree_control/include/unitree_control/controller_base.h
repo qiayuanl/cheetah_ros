@@ -51,6 +51,7 @@ protected:
   RobotState robot_state_;
   std::shared_ptr<StateEstimateBase> state_estimate_;
 
+  std::shared_ptr<urdf::ModelInterface> urdf_;
   std::shared_ptr<pinocchio::Model> pin_model_;
   std::shared_ptr<pinocchio::Data> pin_data_;
 

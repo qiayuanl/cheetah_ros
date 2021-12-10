@@ -30,11 +30,11 @@ public:
   void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
   void buildQp(double dt);
 
-  const MatrixXd& getHessianMat();
-  const VectorXd& getGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
-  const MatrixXd& getConstrainMat(double mu);
-  const VectorXd& getUpperBound(double f_max, const VectorXd& gait_table);
-  const VectorXd& getLowerBound();
+  const MatrixXd& buildHessianMat();
+  const VectorXd& buildGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
+  const MatrixXd& buildConstrainMat(double mu);
+  const VectorXd& buildUpperBound(double f_max, const VectorXd& gait_table);
+  const VectorXd& buildLowerBound();
 
 private:
   int horizon_;
