@@ -15,11 +15,12 @@ using namespace Eigen;
 
 int main()
 {
+  int horizon = 18;
   MpcFormulation mpc_formulation;
 
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
-  mpc_formulation.setUp(10, weight);
+  mpc_formulation.setUp(horizon, weight);
 
   // State space
   RobotState state;
@@ -48,6 +49,16 @@ int main()
   start = system_clock::now();
   mpc_formulation.getHessianMat();
   std::cout << "getHessianMat spend "
+            << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
+                   microseconds::period::den
+            << " second" << endl;
+
+  Matrix<double, Dynamic, 1> traj;
+  traj.resize(MpcFormulation::STATE_DIM * horizon);
+  traj.setZero();
+  start = system_clock::now();
+  mpc_formulation.getGVec(9.81, state, traj);
+  std::cout << "getGVec spend "
             << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
                    microseconds::period::den
             << " second" << endl;
