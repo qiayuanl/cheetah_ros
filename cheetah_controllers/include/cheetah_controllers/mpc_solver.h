@@ -49,10 +49,10 @@ protected:
   {
     std::lock_guard<std::mutex> guard(mutex_);
     formulate();
-    solve();
+    solving();
   };
 
-  virtual void solve() = 0;
+  virtual void solving() = 0;
 
   MpcFormulation mpc_formulation_;
 
@@ -82,7 +82,21 @@ private:
 
 class QpOasesSolver : public MpcSolverBase
 {
-public:
+protected:
+  void solving() override
+  {
+    auto qp_problem = qpOASES::QProblem(12 * mpc_formulation_.horizon_, 20 * mpc_formulation_.horizon_);
+    qpOASES::Options options;
+    options.setToMPC();
+    options.printLevel = qpOASES::PL_NONE;
+    qp_problem.setOptions(options);
+    int n_wsr = 100;
+    qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
+                    nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
+    std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
+    qp_problem.getPrimalSolution(qp_sol.data());
+  }
+
 private:
 };
 

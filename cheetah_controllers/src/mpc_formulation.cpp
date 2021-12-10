@@ -97,7 +97,7 @@ void MpcFormulation::buildQp(double dt)
   }
 }
 
-const MatrixXd& MpcFormulation::buildHessianMat()
+const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildHessianMat()
 {
   h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
   return h_;
@@ -120,7 +120,7 @@ const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& stat
   return g_;
 }
 
-const MatrixXd& MpcFormulation::buildConstrainMat(double mu)
+const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildConstrainMat(double mu)
 {
   c_.setZero();
   double mu_inv = 1.f / mu;

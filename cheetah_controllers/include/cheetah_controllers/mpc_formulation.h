@@ -30,15 +30,23 @@ public:
   void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
   void buildQp(double dt);
 
-  const MatrixXd& buildHessianMat();
+  const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& buildHessianMat();
   const VectorXd& buildGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
-  const MatrixXd& buildConstrainMat(double mu);
+  const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& buildConstrainMat(double mu);
   const VectorXd& buildUpperBound(double f_max, const VectorXd& gait_table);
   const VectorXd& buildLowerBound();
 
-private:
   int horizon_;
 
+  // Final QP Formation
+  // 1/2 U^{-T} H U + U^{T} g
+  Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> h_;  // hessian Matrix
+  VectorXd g_;                                           // g vector
+  Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> c_;  // constrain matrix
+  VectorXd u_b_;                                         // upper bound
+  VectorXd l_b_;                                         // lower bound
+
+private:
   // State Space Model
   Matrix<double, STATE_DIM, STATE_DIM> a_c_;
   Matrix<double, STATE_DIM, ACTION_DIM> b_c_;
@@ -48,14 +56,6 @@ private:
   // Weight
   // L matrix: Diagonal matrix of weights for state deviations
   Eigen::DiagonalMatrix<double, Eigen::Dynamic, Eigen::Dynamic> l_;
-
-  // Final QP Formation
-  // 1/2 U^{-T} H U + U^{T} g
-  MatrixXd h_;    // hessian Matrix
-  VectorXd g_;    // g vector
-  MatrixXd c_;    // constrain matrix
-  VectorXd u_b_;  // upper bound
-  VectorXd l_b_;  // lower bound
 };
 
 }  // namespace unitree_ros
