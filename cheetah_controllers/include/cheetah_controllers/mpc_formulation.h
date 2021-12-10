@@ -56,9 +56,6 @@ private:
   MatrixXd c_;    // constrain matrix
   VectorXd u_b_;  // upper bound
   VectorXd l_b_;  // lower bound
-
-  //  Process Value of buildQp
-  Matrix<double, STATE_DIM, STATE_DIM> power_mat_[20];
 };
 
 }  // namespace unitree_ros

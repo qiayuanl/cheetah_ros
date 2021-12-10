@@ -75,20 +75,23 @@ void MpcFormulation::buildQp(double dt)
   Matrix<double, STATE_DIM, STATE_DIM> a_dt = exp.block(0, 0, STATE_DIM, STATE_DIM);
   Matrix<double, STATE_DIM, ACTION_DIM> b_dt = exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
 
-  power_mat_[0].setIdentity();
+  std::vector<Matrix<double, STATE_DIM, STATE_DIM>> power_mats;
+  power_mats.resize(horizon_ + 1);
+
+  power_mats[0].setIdentity();
   for (int i = 1; i < horizon_ + 1; i++)
-    power_mat_[i] = a_dt * power_mat_[i - 1];
+    power_mats[i] = a_dt * power_mats[i - 1];
 
   for (int r = 0; r < horizon_; r++)
   {
-    a_qp_.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mat_[r + 1];  // Adt.pow(r+1);
+    a_qp_.block(STATE_DIM * r, 0, STATE_DIM, STATE_DIM) = power_mats[r + 1];  // Adt.pow(r+1);
 
     for (int c = 0; c < horizon_; c++)
     {
       if (r >= c)
       {
         int a_num = r - c;
-        b_qp_.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mat_[a_num] * b_dt;
+        b_qp_.block(STATE_DIM * r, ACTION_DIM * c, STATE_DIM, ACTION_DIM) = power_mats[a_num] * b_dt;
       }
     }
   }
