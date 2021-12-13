@@ -10,7 +10,7 @@
 
 namespace unitree_ros
 {
-void MpcFormulation::setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
+void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
 {
   horizon_ = horizon;
   // Resize

@@ -22,7 +22,7 @@ public:
   {
     std::lock_guard<std::mutex> guard(mutex_);
 
-    mpc_formulation_.setUp(horizon, weight);
+    mpc_formulation_.setup(horizon, weight);
     f_max_ = f_max;
   }
 

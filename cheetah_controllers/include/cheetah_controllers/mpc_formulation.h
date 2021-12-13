@@ -25,7 +25,7 @@ public:
   static constexpr int STATE_DIM = 13;   // 6 dof pose + 6 dof velocity + 1 gravity.
   static constexpr int ACTION_DIM = 12;  // 4 ground reaction force.
 
-  void setUp(int horizon, const Matrix<double, STATE_DIM, 1>& weight);
+  void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight);
 
   void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
   void buildQp(double dt);
