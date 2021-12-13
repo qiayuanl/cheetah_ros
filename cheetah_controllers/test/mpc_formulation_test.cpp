@@ -27,6 +27,7 @@ int main()
   Matrix3d inertia;
   inertia << 1, 0, 0, 0, 1, 0, 0, 0, 1;
   state.pos_ << 0, 0, 0.25;
+  state.quat_.setIdentity();
   state.foot_pos_[0] << 0.25, 0.2, 0;
   state.foot_pos_[1] << 0.25, -0.2, 0;
   state.foot_pos_[2] << -0.25, 0.2, 0;

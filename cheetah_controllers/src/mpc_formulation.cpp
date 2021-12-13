@@ -41,8 +41,12 @@ Matrix3d convertToSkewSymmetric(const Vector3d& vec)
 
 void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state)
 {
-  Matrix3d rot;  // TODO: convert from quat
-  rot << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  Matrix3d rot;
+  Vector3d rpy = quatToRPY(state.quat_);
+  double yaw_cos = std::cos(rpy(2));
+  double yaw_sin = std::sin(rpy(2));
+  rot << yaw_cos, -yaw_sin, 0, yaw_sin, yaw_cos, 0, 0, 0, 1;
+
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
     r_feet.col(i) = state.foot_pos_[i] - state.pos_;
@@ -107,10 +111,10 @@ const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& stat
                                           const Matrix<double, Dynamic, 1>& traj)
 {
   // Update x_0 and x_ref
-  Vector3d rpy;  // TODO: convert from quat
-  rpy.setZero();
   Matrix<double, STATE_DIM, 1> x_0;
   VectorXd x_ref(STATE_DIM * horizon_);
+
+  Vector3d rpy = quatToRPY(state.quat_);
   x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, gravity;
   for (int i = 0; i < horizon_; i++)
     for (int j = 0; j < STATE_DIM - 1; j++)
