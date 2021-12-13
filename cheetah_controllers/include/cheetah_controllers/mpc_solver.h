@@ -7,23 +7,25 @@
 #include <mutex>
 #include <thread>
 #include <qpOASES.hpp>
+#include <ros/ros.h>
 
 namespace unitree_ros
 {
 class MpcSolverBase
 {
 public:
+  virtual ~MpcSolverBase(){};
   MpcSolverBase(double mass, const Matrix3d& inertia, double gravity, double mu)
     : mass_(mass), gravity_(gravity), mu_(mu)
   {
   }
 
-  void setup(int horizon, const Matrix<double, 13, 1>& weight, double f_max)
+  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight)
   {
     std::lock_guard<std::mutex> guard(mutex_);
-
-    mpc_formulation_.setup(horizon, weight);
+    dt_ = dt;
     f_max_ = f_max;
+    mpc_formulation_.setup(horizon, weight);
   }
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
@@ -82,13 +84,16 @@ private:
 
 class QpOasesSolver : public MpcSolverBase
 {
+public:
+  using MpcSolverBase::MpcSolverBase;
+
 protected:
   void solving() override
   {
     auto qp_problem = qpOASES::QProblem(12 * mpc_formulation_.horizon_, 20 * mpc_formulation_.horizon_);
     qpOASES::Options options;
     options.setToMPC();
-    options.printLevel = qpOASES::PL_NONE;
+    options.printLevel = qpOASES::PL_HIGH;
     qp_problem.setOptions(options);
     int n_wsr = 100;
     qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
@@ -96,8 +101,6 @@ protected:
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
     qp_problem.getPrimalSolution(qp_sol.data());
   }
-
-private:
 };
 
 }  // namespace unitree_ros

@@ -78,4 +78,10 @@ target_link_libraries(mpc_formulation_test
         ${PROJECT_NAME}
         )
 
+add_executable(mpc_solver_test test/mpc_solver_test.cpp)
+target_link_libraries(mpc_solver_test
+        ${catkin_LIBRARIES}
+        ${PROJECT_NAME}
+        )
+
 roslint_cpp()

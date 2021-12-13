@@ -20,7 +20,7 @@ int main()
 
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
-  mpc_formulation.setUp(horizon, weight);
+  mpc_formulation.setup(horizon, weight);
 
   // State space
   RobotState state;
