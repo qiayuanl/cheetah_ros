@@ -2,9 +2,6 @@
 // Created by qiayuan on 2021/12/14.
 //
 
-#include <iostream>
-#include <chrono>
-
 #include <cheetah_controllers/mpc_solver.h>
 
 using namespace std;
@@ -15,13 +12,13 @@ using namespace Eigen;
 
 int main()
 {
-  int horizon = 18;
+  int horizon = 1;
 
   double mass = 15.;
   Matrix3d inertia;
   inertia << 11253, 0, 0, 0, 36203, 0, 0, 0, 42673;
 
-  std::shared_ptr<MpcSolverBase> mpc_solver = std::make_shared<QpOasesSolver>(mass, inertia, 9.81, 0.3);
+  std::shared_ptr<MpcSolverBase> mpc_solver = std::make_shared<QpOasesSolver>(mass, 9.81, 0.3, inertia);
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
 

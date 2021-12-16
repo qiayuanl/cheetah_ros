@@ -15,8 +15,8 @@ class MpcSolverBase
 {
 public:
   virtual ~MpcSolverBase(){};
-  MpcSolverBase(double mass, const Matrix3d& inertia, double gravity, double mu)
-    : mass_(mass), gravity_(gravity), mu_(mu)
+  MpcSolverBase(double mass, double gravity, double mu, const Matrix3d& inertia)
+    : mass_(mass), gravity_(gravity), mu_(mu), inertia_(inertia)
   {
   }
 
