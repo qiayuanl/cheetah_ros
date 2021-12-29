@@ -40,13 +40,13 @@ int main()
   traj.resize(12 * horizon);
   traj.setZero();
   for (int i = 0; i < horizon; ++i)
-    traj[12 * i + 2] = 0.2;
-
-  mpc_solver->solve(ros::Time(0.1), state, gait_table, traj);
-
-  while (1)
   {
-    sleep(1);
+    traj[12 * i + 3] = 0.2;
+    traj[12 * i + 5] = 0.2;
   }
+  mpc_solver->solve(ros::Time(0.1), state, gait_table, traj);
+  sleep(1);
+  for (const auto& force : mpc_solver->getSolution())
+    std::cout << force << "\n" << std::endl;
   return 0;
 }

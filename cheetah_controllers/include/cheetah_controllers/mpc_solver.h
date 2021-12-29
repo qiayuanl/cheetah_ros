@@ -18,6 +18,7 @@ public:
   MpcSolverBase(double mass, double gravity, double mu, const Matrix3d& inertia)
     : mass_(mass), gravity_(gravity), mu_(mu), inertia_(inertia)
   {
+    solution_.resize(4);
   }
 
   void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight)
@@ -46,6 +47,11 @@ public:
     }
   }
 
+  const std::vector<Vec3<double>>& getSolution()
+  {
+    return solution_;
+  }
+
 protected:
   void solvingThread()
   {
@@ -57,6 +63,7 @@ protected:
   virtual void solving() = 0;
 
   MpcFormulation mpc_formulation_;
+  std::vector<Vec3<double>> solution_;
 
   std::mutex mutex_;
   std::shared_ptr<std::thread> thread_;
@@ -95,11 +102,17 @@ protected:
     options.setToMPC();
     options.printLevel = qpOASES::PL_HIGH;
     qp_problem.setOptions(options);
-    int n_wsr = 100;
+    int n_wsr = 10000;
     qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
                     nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
     qp_problem.getPrimalSolution(qp_sol.data());
+    for (int leg = 0; leg < 4; ++leg)
+    {
+      solution_[leg].x() = qp_sol[3 * leg];
+      solution_[leg].y() = qp_sol[3 * leg + 1];
+      solution_[leg].z() = qp_sol[3 * leg + 2];
+    }
   }
 };
 
