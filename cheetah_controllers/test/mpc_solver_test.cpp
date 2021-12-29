@@ -14,9 +14,9 @@ int main()
 {
   int horizon = 1;
 
-  double mass = 15.;
+  double mass = 11.041;
   Matrix3d inertia;
-  inertia << 11253, 0, 0, 0, 36203, 0, 0, 0, 42673;
+  inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
 
   std::shared_ptr<MpcSolverBase> mpc_solver = std::make_shared<QpOasesSolver>(mass, -9.81, 0.3, inertia);
   Matrix<double, 13, 1> weight;

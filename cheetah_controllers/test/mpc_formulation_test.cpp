@@ -23,9 +23,11 @@ int main()
   mpc_formulation.setup(horizon, weight);
 
   // State space
-  RobotState state;
+  double mass = 11.041;
   Matrix3d inertia;
-  inertia << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
+
+  RobotState state;
   state.pos_ << 0, 0, 0.25;
   state.quat_.setIdentity();
   state.foot_pos_[0] << 0.25, 0.2, 0;
@@ -34,7 +36,7 @@ int main()
   state.foot_pos_[3] << -0.25, -0.2, 0;
 
   auto start = system_clock::now();
-  mpc_formulation.buildStateSpace(5.0, inertia, state);  // Debug 0.001286s Release 0.0005s
+  mpc_formulation.buildStateSpace(mass, inertia, state);  // Debug 0.001286s Release 0.0005s
   std::cout << "buildStateSpace spend "
             << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
                    microseconds::period::den

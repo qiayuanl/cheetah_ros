@@ -102,7 +102,7 @@ protected:
     options.setToMPC();
     options.printLevel = qpOASES::PL_HIGH;
     qp_problem.setOptions(options);
-    int n_wsr = 10000;
+    int n_wsr = 100;
     qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
                     nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
