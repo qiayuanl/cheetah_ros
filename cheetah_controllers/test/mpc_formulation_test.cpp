@@ -58,7 +58,7 @@ int main()
   traj.resize(MpcFormulation::STATE_DIM * horizon);
   traj.setZero();
   start = system_clock::now();
-  mpc_formulation.buildGVec(9.81, state, traj);
+  mpc_formulation.buildGVec(-9.81, state, traj);
   std::cout << "buildGVec spend "
             << double(duration_cast<microseconds>(system_clock::now() - start).count()) * microseconds::period::num /
                    microseconds::period::den

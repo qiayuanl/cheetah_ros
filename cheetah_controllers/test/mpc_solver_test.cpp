@@ -18,7 +18,7 @@ int main()
   Matrix3d inertia;
   inertia << 11253, 0, 0, 0, 36203, 0, 0, 0, 42673;
 
-  std::shared_ptr<MpcSolverBase> mpc_solver = std::make_shared<QpOasesSolver>(mass, 9.81, 0.3, inertia);
+  std::shared_ptr<MpcSolverBase> mpc_solver = std::make_shared<QpOasesSolver>(mass, -9.81, 0.3, inertia);
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
 
