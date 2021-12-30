@@ -72,6 +72,7 @@ void MpcFormulation::buildQp(double dt)
 {
   // Convert model from continuous to discrete time
   Matrix<double, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_c;
+  ab_c.setZero();
   ab_c.block(0, 0, STATE_DIM, STATE_DIM) = a_c_;
   ab_c.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) = b_c_;
   ab_c = dt * ab_c;
@@ -81,7 +82,8 @@ void MpcFormulation::buildQp(double dt)
 
   std::vector<Matrix<double, STATE_DIM, STATE_DIM>> power_mats;
   power_mats.resize(horizon_ + 1);
-
+  for (auto& power_mat : power_mats)
+    power_mat.setZero();
   power_mats[0].setIdentity();
   for (int i = 1; i < horizon_ + 1; i++)
     power_mats[i] = a_dt * power_mats[i - 1];
