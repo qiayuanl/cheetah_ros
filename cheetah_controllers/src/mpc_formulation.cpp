@@ -58,8 +58,7 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   for (int i = 0; i < 4; ++i)
     r_feet.col(i) = state.foot_pos_[i] - state.pos_;
 
-  a_c_.setZero();
-  a_c_.block<3, 3>(0, 6) = rot.transpose();
+  a_c_.block<3, 3>(0, 6) = rot;
 
   a_c_(3, 9) = 1.;
   a_c_(4, 10) = 1.;
@@ -123,7 +122,7 @@ const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& stat
   VectorXd x_ref(STATE_DIM * horizon_);
 
   Vector3d rpy = quatToRPY(state.quat_);
-  x_0 << rpy(2), rpy(1), rpy(0), state.pos_, state.angular_vel_, state.linear_vel_, gravity;
+  x_0 << rpy(0), rpy(1), rpy(2), state.pos_, state.angular_vel_, state.linear_vel_, gravity;
   for (int i = 0; i < horizon_; i++)
     for (int j = 0; j < STATE_DIM - 1; j++)
       x_ref(STATE_DIM * i + j, 0) = traj[12 * i + j];

@@ -31,7 +31,7 @@ public:
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
   {
-    if ((time - last_update_).toSec() > dt_)
+    if ((time - last_update_).toSec() > dt_ && time > ros::Time(0))
     {
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
@@ -100,13 +100,16 @@ protected:
     auto qp_problem = qpOASES::QProblem(12 * mpc_formulation_.horizon_, 20 * mpc_formulation_.horizon_);
     qpOASES::Options options;
     options.setToMPC();
-    options.printLevel = qpOASES::PL_HIGH;
+    options.printLevel = qpOASES::PL_LOW;
     qp_problem.setOptions(options);
-    int n_wsr = 100;
+    int n_wsr = 1000;
     qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
                     nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
-    qp_problem.getPrimalSolution(qp_sol.data());
+
+    if (qp_problem.getPrimalSolution(qp_sol.data()) != qpOASES::SUCCESSFUL_RETURN)
+      ROS_WARN("Failed to solve mpc!\n");
+
     for (int leg = 0; leg < 4; ++leg)
     {
       solution_[leg].x() = qp_sol[3 * leg];
