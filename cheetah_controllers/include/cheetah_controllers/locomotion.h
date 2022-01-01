@@ -19,6 +19,8 @@ public:
 
 protected:
   std::map<std::string, OffsetDurationGaitRos<double>::Ptr> name2gaits_;
+  std::shared_ptr<MpcSolverBase> solver_;
+  const int horizon_ = 10;
 };
 
 }  // namespace unitree_ros
