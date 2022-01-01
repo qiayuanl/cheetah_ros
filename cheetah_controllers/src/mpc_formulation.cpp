@@ -24,6 +24,13 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
   u_b_.resize(5 * 4 * horizon, Eigen::NoChange);
   l_b_.resize(5 * 4 * horizon, Eigen::NoChange);
+  // Set Zero
+  a_c_.setZero();
+  b_c_.setZero();
+  a_qp_.setZero();
+  a_c_.setZero();
+  b_qp_.setZero();
+  l_.setZero();
   l_.diagonal() = weight.replicate(horizon, 1);
 }
 
@@ -60,7 +67,6 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   a_c_(11, 12) = 1.;
 
   //  b contains non_zero elements only in row 6 : 12.
-  b_c_.setZero();
   for (int i = 0; i < 4; ++i)
   {
     b_c_.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
