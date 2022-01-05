@@ -28,17 +28,17 @@ public:
   DVec<T> getMpcTable(int horizon)
   {
     DVec<T> mpc_table(4 * horizon);
-    int iteration = std::fmod(phase_ / (cycle_ / horizon), horizon);
+    int iteration = phase_ * horizon;
 
     for (int i = 0; i < horizon; i++)
     {
-      int iter = (i + iteration + 1) % horizon;
+      int iter = (i + iteration) % horizon;
       for (int j = 0; j < 4; j++)
       {
-        int progress = iter - offsets_[i] * horizon;
+        int progress = iter - offsets_[j] * horizon;
         if (progress < 0)
           progress += 1.;
-        if (progress > durations_[i] * horizon)
+        if (progress > durations_[j] * horizon)
           mpc_table[i * 4 + j] = 0;
         else
           mpc_table[i * 4 + j] = 1;
