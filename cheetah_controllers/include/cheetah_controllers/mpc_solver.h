@@ -44,6 +44,8 @@ public:
         thread_ = std::make_shared<std::thread>(std::thread(&MpcSolverBase::solvingThread, this));
         thread_->detach();
       }
+      else
+        ROS_WARN("Solve timeout.");
     }
   }
 

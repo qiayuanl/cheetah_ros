@@ -26,7 +26,7 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
 
-  solver_->setup(0.05, horizon_, 666., weight);
+  solver_->setup(0.03, horizon_, 666., weight);
 
   return true;
 }
@@ -38,46 +38,38 @@ void LocomotionController::updateData(const ros::Time& time, const ros::Duration
 
 void LocomotionController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
-  //  auto gait = name2gaits_.begin()->second;
-  //  gait->update(time);
-  //  Vec4<int> contact_state_desired = gait->getContactState();
-  //  Vec4<double> swing_time = gait->getSwingTime();
-  //  double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
-  //  double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
-  //
-  //  for (int j = 0; j < 4; ++j)
-  //  {
-  //    LegPrefix leg = LegPrefix(j);
-  //    if (contact_state_desired[j] == 1)
-  //    {
-  //      Eigen::Vector3d force;
-  //      force.setZero();
-  //      setStand(leg, force);
-  //    }
-  //    else if (contact_state_desired[j] == 0 && getFootState(leg) == STAND)
-  //    {
-  //      Eigen::Vector3d pos;
-  //      pos << sign_fr[j] * 0.2, sign_lr[j] * 0.2, 0.75;
-  //      setSwing(leg, pos, 0.1, swing_time[j]);
-  //    }
-  //  }
+  auto gait = name2gaits_.begin()->second;
+  gait->update(time);
+  Vec4<int> contact_state_desired = gait->getContactState();
+  Vec4<double> swing_time = gait->getSwingTime();
+  double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
+  double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
 
-  Eigen::VectorXd gait_table;
-  gait_table.resize(horizon_ * 4);
-  gait_table.setOnes();
   Eigen::VectorXd traj;
   traj.resize(12 * horizon_);
   traj.setZero();
   for (int i = 0; i < horizon_; ++i)
   {
-    traj[12 * i + 3] = 0.0;
-    traj[12 * i + 5] = 0.3;
+    traj[12 * i + 5] = 0.35;
   }
 
-  solver_->solve(time, robot_state_, gait_table, traj);
+  solver_->solve(time, robot_state_, gait->getMpcTable(horizon_), traj);
   std::vector<Vec3<double>> solution = solver_->getSolution();
-  for (int leg = 0; leg < 4; ++leg)
-    setStand(LegPrefix(leg), solution[leg]);
+
+  for (int j = 0; j < 4; ++j)
+  {
+    LegPrefix leg = LegPrefix(j);
+    if (contact_state_desired[j] == 1)
+      setStand(leg, solution[j]);
+
+    else if (contact_state_desired[j] == 0 && getFootState(leg) == STAND)
+    {
+      Eigen::Vector3d pos;
+      pos << sign_fr[j] * 0.25, sign_lr[j] * 0.2, 0.;
+      setSwing(leg, pos, 0.1, swing_time[j]);
+    }
+  }
+
   FeetController::updateCommand(time, period);
 }
 

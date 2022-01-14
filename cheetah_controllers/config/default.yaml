@@ -12,5 +12,9 @@ controllers:
     gaits:
       trot:
         cycle: 0.3
+        offsets: [ 0., 0.5, 0.5, 0. ]
+        durations: [ 0.6, 0.6, 0.6, 0.6 ]
+      hold:
+        cycle: 0.3
         offsets: [ 0., 0., 0., 0. ]
-        durations: [ 0.5, 0.5, 0.5, 0.5 ]
+        durations: [ 1., 1., 1., 1. ]
