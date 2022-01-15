@@ -15,7 +15,7 @@ find_package(catkin REQUIRED
         roscpp
         roslint
         controller_interface
-        cheetah_control
+        cheetah_basic_controllers
         qpoases_vendor
         )
 
@@ -31,7 +31,7 @@ catkin_package(
         roscpp
         roslint
         controller_interface
-        cheetah_control
+        cheetah_basic_controllers
         qpoases_vendor
 )
 

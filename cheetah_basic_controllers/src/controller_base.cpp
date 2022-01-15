@@ -2,7 +2,7 @@
 // Created by qiayuan on 2021/11/6.
 //
 
-#include "cheetah_control/controller_base.h"
+#include "cheetah_basic_controllers/controller_base.h"
 
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>

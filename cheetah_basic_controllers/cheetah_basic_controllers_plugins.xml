@@ -1,4 +1,4 @@
-<library path="lib/libcheetah_control">
+<library path="lib/libcheetah_basic_controllers">
 
     <class name="cheetah_ros/ControllerBase" type="cheetah_ros::ControllerBase"
            base_class_type="controller_interface::ControllerBase">

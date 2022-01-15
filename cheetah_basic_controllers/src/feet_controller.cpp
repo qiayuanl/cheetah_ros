@@ -1,7 +1,7 @@
 //
 // Created by qiayuan on 2021/11/9.
 //
-#include "cheetah_control/feet_controller.h"
+#include "cheetah_basic_controllers/feet_controller.h"
 
 #include <cheetah_common/ros_utilities.h>
 #include <pluginlib/class_list_macros.hpp>

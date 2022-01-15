@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <cheetah_control/feet_controller.h>
+#include <cheetah_basic_controllers/feet_controller.h>
 #include "mpc_solver.h"
 #include "gait.h"
 

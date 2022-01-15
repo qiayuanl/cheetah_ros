@@ -5,8 +5,8 @@
  * Currently uses Bezier curves like Cheetah 3 does
  */
 
-#include "cheetah_control/foot_swing_trajectory.h"
-#include "cheetah_control/interpolation.h"
+#include "cheetah_basic_controllers/foot_swing_trajectory.h"
+#include "cheetah_basic_controllers/interpolation.h"
 
 namespace cheetah_ros
 {

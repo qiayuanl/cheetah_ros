@@ -5,7 +5,7 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <cheetah_control/cpp_types.h>
+#include <cheetah_basic_controllers/cpp_types.h>
 #include <cheetah_common/ros_utilities.h>
 
 namespace cheetah_ros

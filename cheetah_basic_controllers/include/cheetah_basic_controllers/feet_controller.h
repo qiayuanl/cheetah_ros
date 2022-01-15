@@ -6,7 +6,7 @@
 #include "controller_base.h"
 #include "foot_swing_trajectory.h"
 #include <cheetah_msgs/FeetCmd.h>
-#include <cheetah_control/FeetConfig.h>
+#include <cheetah_basic_controllers/FeetConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 namespace cheetah_ros

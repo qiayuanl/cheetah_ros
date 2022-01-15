@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>cheetah_control</name>
+    <name>cheetah_basic_controllers</name>
     <version>0.0.0</version>
-    <description>The cheetah_control packages.</description>
+    <description>The cheetah_basic_controllers packages.</description>
     <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
     <license>BSD</license>
     <author email="liaoqiayuan@gmail.com">Qiayuan Liao</author>
@@ -23,6 +23,6 @@
     <exec_depend>controller_manager</exec_depend>
 
     <export>
-        <controller_interface plugin="${prefix}/cheetah_control_plugins.xml"/>
+        <controller_interface plugin="${prefix}/cheetah_basic_controllers_plugins.xml"/>
     </export>
 </package>
