@@ -5,11 +5,11 @@
 #pragma once
 #include "controller_base.h"
 #include "foot_swing_trajectory.h"
-#include <unitree_msgs/FeetCmd.h>
-#include <unitree_control/FeetConfig.h>
+#include <cheetah_msgs/FeetCmd.h>
+#include <cheetah_control/FeetConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class FeetController : public ControllerBase
 {
@@ -39,19 +39,19 @@ public:
 
 private:
   Eigen::Matrix3d initK(XmlRpc::XmlRpcValue& feet_params, const std::string& name);
-  void feetCmdCallback(const unitree_msgs::FeetCmd::ConstPtr& msg);
-  void dynamicCallback(unitree_ros::FeetConfig& config, uint32_t /*level*/);
+  void feetCmdCallback(const cheetah_msgs::FeetCmd::ConstPtr& msg);
+  void dynamicCallback(cheetah_ros::FeetConfig& config, uint32_t /*level*/);
 
   FootSwingTrajectory<double> swing_trajectory_[4];
   State states_[4];
 
   // ROS Topic interface
   ros::Subscriber feet_cmd_sub_;
-  realtime_tools::RealtimeBuffer<unitree_msgs::FeetCmd> feet_cmd_buffer_;
+  realtime_tools::RealtimeBuffer<cheetah_msgs::FeetCmd> feet_cmd_buffer_;
   // Dynamic reconfigure
   realtime_tools::RealtimeBuffer<K> k_buffer;
-  std::shared_ptr<dynamic_reconfigure::Server<unitree_ros::FeetConfig>> dynamic_srv_{};
+  std::shared_ptr<dynamic_reconfigure::Server<cheetah_ros::FeetConfig>> dynamic_srv_{};
   bool dynamic_initialized_;
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

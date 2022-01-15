@@ -3,9 +3,9 @@ controllers:
     type: joint_state_controller/JointStateController
     publish_rate: 100
   base_controller:
-    type: unitree_ros/ControllerBase
+    type: cheetah_ros/ControllerBase
   feets_controller:
-    type: unitree_ros/FeetController
+    type: cheetah_ros/FeetController
     feet:
       kp_stand: [ 1000., 1000., 1000. ]
       kd_stand: [ 10., 10., 10. ]

@@ -5,10 +5,10 @@
  * Currently uses Bezier curves like Cheetah 3 does
  */
 
-#include "unitree_control/foot_swing_trajectory.h"
-#include "unitree_control/interpolation.h"
+#include "cheetah_control/foot_swing_trajectory.h"
+#include "cheetah_control/interpolation.h"
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 /*!
  * Compute foot swing trajectory with a bezier curve
@@ -47,4 +47,4 @@ void FootSwingTrajectory<T>::computeSwingTrajectoryBezier(T phase, T swing_time)
 template class FootSwingTrajectory<double>;
 template class FootSwingTrajectory<float>;
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

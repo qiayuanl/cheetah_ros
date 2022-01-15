@@ -1,13 +1,13 @@
-<library path="lib/libunitree_control">
+<library path="lib/libcheetah_control">
 
-    <class name="unitree_ros/ControllerBase" type="unitree_ros::ControllerBase"
+    <class name="cheetah_ros/ControllerBase" type="cheetah_ros::ControllerBase"
            base_class_type="controller_interface::ControllerBase">
         <description>
             The controller base of quadruped.
         </description>
     </class>
 
-    <class name="unitree_ros/FeetController" type="unitree_ros::FeetController"
+    <class name="cheetah_ros/FeetController" type="cheetah_ros::FeetController"
            base_class_type="controller_interface::ControllerBase">
         <description>
             The feet controller.

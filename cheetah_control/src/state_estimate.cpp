@@ -1,9 +1,9 @@
 //
 // Created by qiayuan on 2021/11/15.
 //
-#include "unitree_control/state_estimate.h"
+#include "cheetah_control/state_estimate.h"
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 GroundTruth::GroundTruth(ros::NodeHandle& nh) : StateEstimateBase(nh)
 {
@@ -25,4 +25,4 @@ void GroundTruth::update(RobotState& state)
   state.angular_vel_ << odom.twist.twist.angular.x, odom.twist.twist.angular.y, odom.twist.twist.angular.z;
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

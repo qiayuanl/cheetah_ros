@@ -1,12 +1,12 @@
 //
 // Created by qiayuan on 2021/11/9.
 //
-#include "unitree_control/feet_controller.h"
+#include "cheetah_control/feet_controller.h"
 
-#include <unitree_common/ros_utilities.h>
+#include <cheetah_common/ros_utilities.h>
 #include <pluginlib/class_list_macros.hpp>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
 {
@@ -25,11 +25,11 @@ bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
 
   // ROS Topic
   feet_cmd_sub_ =
-      controller_nh.subscribe<unitree_msgs::FeetCmd>("/cmd_feet", 1, &FeetController::feetCmdCallback, this);
+      controller_nh.subscribe<cheetah_msgs::FeetCmd>("/cmd_feet", 1, &FeetController::feetCmdCallback, this);
 
   // Dynamic reconfigure
-  dynamic_srv_ = std::make_shared<dynamic_reconfigure::Server<unitree_ros::FeetConfig>>(controller_nh);
-  dynamic_reconfigure::Server<unitree_ros::FeetConfig>::CallbackType cb = [this](auto&& PH1, auto&& PH2) {
+  dynamic_srv_ = std::make_shared<dynamic_reconfigure::Server<cheetah_ros::FeetConfig>>(controller_nh);
+  dynamic_reconfigure::Server<cheetah_ros::FeetConfig>::CallbackType cb = [this](auto&& PH1, auto&& PH2) {
     dynamicCallback(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
   };
   dynamic_initialized_ = false;
@@ -40,7 +40,7 @@ bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
 void FeetController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
   // Update Command from ROS topic interface.
-  unitree_msgs::FeetCmd cmd_msgs = *feet_cmd_buffer_.readFromRT();
+  cheetah_msgs::FeetCmd cmd_msgs = *feet_cmd_buffer_.readFromRT();
   for (size_t j = 0; j < cmd_msgs.leg_prefix.size(); ++j)
   {
     State& state = states_[cmd_msgs.leg_prefix[j].prefix];
@@ -131,7 +131,7 @@ Eigen::Matrix3d FeetController::initK(XmlRpc::XmlRpcValue& feet_params, const st
   return k;
 }
 
-void FeetController::feetCmdCallback(const unitree_msgs::FeetCmd::ConstPtr& msg)
+void FeetController::feetCmdCallback(const cheetah_msgs::FeetCmd::ConstPtr& msg)
 {
   feet_cmd_buffer_.writeFromNonRT(*msg);
 }
@@ -177,6 +177,6 @@ void FeetController::dynamicCallback(FeetConfig& config, uint32_t /*unused*/)
   k_buffer.writeFromNonRT(k);
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
 
-PLUGINLIB_EXPORT_CLASS(unitree_ros::FeetController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(cheetah_ros::FeetController, controller_interface::ControllerBase)

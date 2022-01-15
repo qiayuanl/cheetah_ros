@@ -9,17 +9,17 @@
 #include <urdf_parser/urdf_parser.h>
 
 #include <controller_interface/multi_interface_controller.h>
-#include <unitree_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
 
-#include <unitree_msgs/LegsCmd.h>
-#include <unitree_msgs/LegsState.h>
+#include <cheetah_msgs/LegsCmd.h>
+#include <cheetah_msgs/LegsState.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
 
 #include "cpp_types.h"
 #include "state_estimate.h"
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class ControllerBase : public controller_interface::MultiInterfaceController<HybridJointInterface>
 {
@@ -56,15 +56,15 @@ protected:
   std::shared_ptr<pinocchio::Data> pin_data_;
 
 private:
-  void legsCmdCallback(const unitree_msgs::LegsCmd::ConstPtr& msg);
+  void legsCmdCallback(const cheetah_msgs::LegsCmd::ConstPtr& msg);
 
   LegJoints leg_joints_[4];
   LegCmd leg_cmd_[4];
 
   ros::Subscriber legs_cmd_sub_;
-  realtime_tools::RealtimeBuffer<unitree_msgs::LegsCmd> legs_cmd_buffer_;
-  std::shared_ptr<realtime_tools::RealtimePublisher<unitree_msgs::LegsState> > state_pub_;
+  realtime_tools::RealtimeBuffer<cheetah_msgs::LegsCmd> legs_cmd_buffer_;
+  std::shared_ptr<realtime_tools::RealtimePublisher<cheetah_msgs::LegsState> > state_pub_;
   ros::Time last_publish_;
 };
 
-};  // namespace unitree_ros
+};  // namespace cheetah_ros

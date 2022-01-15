@@ -8,7 +8,7 @@
 
 #include "cpp_types.h"
 #include "interpolation.h"
-namespace unitree_ros
+namespace cheetah_ros
 {
 /*!
  * A foot swing trajectory for a single foot
@@ -91,4 +91,4 @@ private:
   T height_;
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

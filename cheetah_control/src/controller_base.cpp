@@ -2,7 +2,7 @@
 // Created by qiayuan on 2021/11/6.
 //
 
-#include "unitree_control/controller_base.h"
+#include "cheetah_control/controller_base.h"
 
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
@@ -10,7 +10,7 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
 {
@@ -34,9 +34,9 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
 
   // ROS Topic
   legs_cmd_sub_ =
-      controller_nh.subscribe<unitree_msgs::LegsCmd>("/cmd_legs", 1, &ControllerBase::legsCmdCallback, this);
+      controller_nh.subscribe<cheetah_msgs::LegsCmd>("/cmd_legs", 1, &ControllerBase::legsCmdCallback, this);
   state_pub_ =
-      std::make_shared<realtime_tools::RealtimePublisher<unitree_msgs::LegsState>>(controller_nh, "/leg_states", 100);
+      std::make_shared<realtime_tools::RealtimePublisher<cheetah_msgs::LegsState>>(controller_nh, "/leg_states", 100);
 
   state_estimate_ = std::make_shared<GroundTruth>(controller_nh);  // TODO add interface
   return true;
@@ -82,7 +82,7 @@ void ControllerBase::updateData(const ros::Time& time, const ros::Duration& peri
 void ControllerBase::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
   // Update Command from ROS topic interface.
-  unitree_msgs::LegsCmd cmd_msgs = *legs_cmd_buffer_.readFromRT();
+  cheetah_msgs::LegsCmd cmd_msgs = *legs_cmd_buffer_.readFromRT();
   for (size_t j = 0; j < cmd_msgs.leg_prefix.size(); ++j)
   {
     LegCmd& cmd = leg_cmd_[cmd_msgs.leg_prefix[j].prefix];
@@ -134,7 +134,7 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
   if (time - last_publish_ > ros::Duration(0.01))  // 100Hz
   {
     last_publish_ = time;
-    unitree_msgs::LegsState legs_state;
+    cheetah_msgs::LegsState legs_state;
     legs_state.header.stamp = time;
     if (state_pub_->trylock())
     {
@@ -152,11 +152,11 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
   }
 }
 
-void ControllerBase::legsCmdCallback(const unitree_msgs::LegsCmd::ConstPtr& msg)
+void ControllerBase::legsCmdCallback(const cheetah_msgs::LegsCmd::ConstPtr& msg)
 {
   legs_cmd_buffer_.writeFromNonRT(*msg);
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
 
-PLUGINLIB_EXPORT_CLASS(unitree_ros::ControllerBase, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(cheetah_ros::ControllerBase, controller_interface::ControllerBase)

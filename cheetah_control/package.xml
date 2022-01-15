@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>unitree_control</name>
+    <name>cheetah_control</name>
     <version>0.0.0</version>
-    <description>The unitree_control packages.</description>
+    <description>The cheetah_control packages.</description>
     <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
     <license>BSD</license>
     <author email="liaoqiayuan@gmail.com">Qiayuan Liao</author>
@@ -15,14 +15,14 @@
     <depend>pluginlib</depend>
     <depend>controller_interface</depend>
     <depend>realtime_tools</depend>
-    <depend>unitree_common</depend>
-    <depend>unitree_msgs</depend>
+    <depend>cheetah_common</depend>
+    <depend>cheetah_msgs</depend>
     <depend>pinocchio</depend>
     <depend>dynamic_reconfigure</depend>
 
     <exec_depend>controller_manager</exec_depend>
 
     <export>
-        <controller_interface plugin="${prefix}/unitree_control_plugins.xml"/>
+        <controller_interface plugin="${prefix}/cheetah_control_plugins.xml"/>
     </export>
 </package>

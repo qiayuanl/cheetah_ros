@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(unitree_control)
+project(cheetah_control)
 
 ## Use C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -17,8 +17,8 @@ find_package(catkin REQUIRED
         pluginlib
         controller_interface
         realtime_tools
-        unitree_common
-        unitree_msgs
+        cheetah_common
+        cheetah_msgs
         dynamic_reconfigure
         )
 
@@ -45,8 +45,8 @@ catkin_package(
         pluginlib
         controller_interface
         realtime_tools
-        unitree_common
-        unitree_msgs
+        cheetah_common
+        cheetah_msgs
         dynamic_reconfigure
         DEPENDS
         #        Boost

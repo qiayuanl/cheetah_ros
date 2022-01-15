@@ -9,7 +9,7 @@
 
 #include "cpp_types.h"
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class StateEstimateBase
 {
@@ -36,4 +36,4 @@ private:
   realtime_tools::RealtimeBuffer<nav_msgs::Odometry> buffer_;
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
