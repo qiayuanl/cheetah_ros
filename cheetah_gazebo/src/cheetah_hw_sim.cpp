@@ -35,12 +35,12 @@
 // Created by qiayuan on 2/10/21.
 //
 
-#include "unitree_gazebo/unitree_hw_sim.h"
+#include "cheetah_gazebo/cheetah_hw_sim.h"
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
-bool UnitreeHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle model_nh,
+bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle model_nh,
                            gazebo::physics::ModelPtr parent_model, const urdf::Model* urdf_model,
                            std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
@@ -66,7 +66,7 @@ bool UnitreeHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   return ret;
 }
 
-void UnitreeHWSim::readSim(ros::Time time, ros::Duration period)
+void CheetahHWSim::readSim(ros::Time time, ros::Duration period)
 {
   gazebo_ros_control::DefaultRobotHWSim::readSim(time, period);
   for (auto& imu : imu_datas_)
@@ -96,7 +96,7 @@ void UnitreeHWSim::readSim(ros::Time time, ros::Duration period)
     cmd = 0;
 }
 
-void UnitreeHWSim::writeSim(ros::Time time, ros::Duration period)
+void CheetahHWSim::writeSim(ros::Time time, ros::Duration period)
 {
   for (auto joint : hybrid_joint_datas_)
   {
@@ -106,7 +106,7 @@ void UnitreeHWSim::writeSim(ros::Time time, ros::Duration period)
   DefaultRobotHWSim::writeSim(time, period);
 }
 
-void UnitreeHWSim::parseImu(XmlRpc::XmlRpcValue& imu_datas, const gazebo::physics::ModelPtr& parent_model)
+void CheetahHWSim::parseImu(XmlRpc::XmlRpcValue& imu_datas, const gazebo::physics::ModelPtr& parent_model)
 {
   ROS_ASSERT(imu_datas.getType() == XmlRpc::XmlRpcValue::TypeStruct);
   for (auto it = imu_datas.begin(); it != imu_datas.end(); ++it)
@@ -168,7 +168,7 @@ void UnitreeHWSim::parseImu(XmlRpc::XmlRpcValue& imu_datas, const gazebo::physic
   }
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
 
-PLUGINLIB_EXPORT_CLASS(unitree_ros::UnitreeHWSim, gazebo_ros_control::RobotHWSim)
+PLUGINLIB_EXPORT_CLASS(cheetah_ros::CheetahHWSim, gazebo_ros_control::RobotHWSim)
 GZ_REGISTER_MODEL_PLUGIN(gazebo_ros_control::GazeboRosControlPlugin)  // Default plugin

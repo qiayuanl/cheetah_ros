@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>unitree_gazebo</name>
+    <name>cheetah_gazebo</name>
     <version>0.0.0</version>
-    <description>The unitree_gazebo packages.</description>
+    <description>The cheetah_gazebo packages.</description>
     <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
     <license>BSD</license>
     <author email="liaoqiayuan@gmail.com">Qiayuan Liao</author>
@@ -12,7 +12,7 @@
     <!-- depend: build, export, and execution dependency -->
     <depend>roscpp</depend>
     <depend>roslint</depend>
-    <depend>unitree_common</depend>
+    <depend>cheetah_common</depend>
 
     <depend>gazebo</depend>
     <depend>gazebo_ros</depend>
@@ -22,7 +22,7 @@
     <exec_depend>xacro</exec_depend>
 
     <export>
-        <gazebo_ros_control plugin="${prefix}/unitree_hw_sim_plugins.xml"/>
+        <gazebo_ros_control plugin="${prefix}/cheetah_hw_sim_plugins.xml"/>
         <gazebo_ros gazebo_model_path="${prefix}/.."/>
     </export>
 </package>

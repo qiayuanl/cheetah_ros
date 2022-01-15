@@ -5,7 +5,7 @@
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <hardware_interface/joint_state_interface.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class HybridJointHandle : public hardware_interface::JointStateHandle
 {
@@ -112,4 +112,4 @@ class HybridJointInterface
 {
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

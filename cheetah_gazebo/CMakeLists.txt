@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(unitree_gazebo)
+project(cheetah_gazebo)
 
 ## Use C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED
         COMPONENTS
         roscpp
         roslint
-        unitree_common
+        cheetah_common
         gazebo_ros
         gazebo_ros_control
         )
@@ -27,10 +27,10 @@ catkin_package(
         INCLUDE_DIRS
         include
         LIBRARIES
-        unitree_hw_sim
+        cheetah_hw_sim
         CATKIN_DEPENDS
         roscpp
-        unitree_common
+        cheetah_common
         gazebo_ros
         gazebo_ros_control
         DEPENDS
@@ -47,15 +47,15 @@ include_directories(
 )
 
 ## Declare a cpp library
-add_library(unitree_hw_sim
-        src/unitree_hw_sim.cpp
+add_library(cheetah_hw_sim
+        src/cheetah_hw_sim.cpp
         )
 
-add_dependencies(unitree_hw_sim
+add_dependencies(cheetah_hw_sim
         ${catkin_EXPORTED_TARGETS}
         )
 
-target_link_libraries(unitree_hw_sim
+target_link_libraries(cheetah_hw_sim
         ${catkin_LIBRARIES}
         ${GAZEBO_LIBRARIES}
         )
@@ -65,7 +65,7 @@ target_link_libraries(unitree_hw_sim
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS unitree_hw_sim
+install(TARGETS cheetah_hw_sim
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -81,7 +81,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #install(DIRECTORY config launch worlds
 #        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 #        )
-install(FILES unitree_hw_sim_plugins.xml
+install(FILES cheetah_hw_sim_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
 

@@ -1,9 +1,8 @@
-# unitree_ros
+# cheetah_ros
 
 ## Overview
 
-Unofficial unitree ROS and ros-control interface and some basic controllers (no only for unitree robots, also include
-some common quadruped robots)
+ROS and ros-control interface and some controllers for quadruped robots.
 
 **Keywords:** example, package, template
 

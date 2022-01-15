@@ -41,9 +41,9 @@
 #include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 
-#include <unitree_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 struct HybridJointData
 {
@@ -62,7 +62,7 @@ struct ImuData
   double linear_acc_cov[9];
 };
 
-class UnitreeHWSim : public gazebo_ros_control::DefaultRobotHWSim
+class CheetahHWSim : public gazebo_ros_control::DefaultRobotHWSim
 {
 public:
   bool initSim(const std::string& robot_namespace, ros::NodeHandle model_nh, gazebo::physics::ModelPtr parent_model,
@@ -80,4 +80,4 @@ private:
   std::list<ImuData> imu_datas_;
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
