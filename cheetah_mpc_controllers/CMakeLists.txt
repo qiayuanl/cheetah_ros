@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cheetah_controllers)
+project(cheetah_mpc_controllers)
 
 ## Use C++14
 set(CMAKE_CXX_STANDARD 14)

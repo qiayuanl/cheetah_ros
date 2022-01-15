@@ -2,7 +2,7 @@
 // Created by qiayuan on 2021/12/14.
 //
 
-#include <cheetah_controllers/mpc_solver.h>
+#include <cheetah_mpc_controllers/mpc_solver.h>
 
 using namespace std;
 using namespace chrono;

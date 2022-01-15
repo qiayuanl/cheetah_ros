@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>cheetah_controllers</name>
+    <name>cheetah_mpc_controllers</name>
     <version>0.0.0</version>
     <description>The cheetah_control packages.</description>
     <maintainer email="liaoqiayuan@gmail.com">Qiayuan Liao</maintainer>
@@ -19,6 +19,6 @@
     <exec_depend>controller_manager</exec_depend>
 
     <export>
-        <controller_interface plugin="${prefix}/cheetah_controllers_plugins.xml"/>
+        <controller_interface plugin="${prefix}/cheetah_mpc_controllers_plugins.xml"/>
     </export>
 </package>

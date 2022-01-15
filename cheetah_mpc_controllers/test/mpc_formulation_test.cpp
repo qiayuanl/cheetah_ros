@@ -5,7 +5,7 @@
 #include <iostream>
 #include <chrono>
 
-#include <cheetah_controllers/mpc_formulation.h>
+#include <cheetah_mpc_controllers/mpc_formulation.h>
 
 using namespace std;
 using namespace chrono;

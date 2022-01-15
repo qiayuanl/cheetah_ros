@@ -1,7 +1,7 @@
 //
 // Created by qiayuan on 2021/11/15.
 //
-#include "cheetah_controllers/locomotion.h"
+#include "cheetah_mpc_controllers/locomotion.h"
 
 #include <pluginlib/class_list_macros.hpp>
 

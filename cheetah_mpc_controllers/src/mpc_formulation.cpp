@@ -4,7 +4,7 @@
 // Refer: https://github.com/mit-biomimetics/Cheetah-Software
 // Refer: https://github.com/google-research/motion_imitation
 
-#include "cheetah_controllers/mpc_formulation.h"
+#include "cheetah_mpc_controllers/mpc_formulation.h"
 
 #include <unsupported/Eigen/MatrixFunctions>
 

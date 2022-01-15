@@ -1,4 +1,4 @@
-<library path="lib/libcheetah_controllers">
+<library path="lib/libcheetah_mpc_controllers">
 
     <class name="cheetah_ros/LocomotionController" type="cheetah_ros::LocomotionController"
            base_class_type="controller_interface::ControllerBase">
