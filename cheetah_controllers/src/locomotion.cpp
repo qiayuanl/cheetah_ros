@@ -5,7 +5,7 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
 {
@@ -73,6 +73,6 @@ void LocomotionController::updateCommand(const ros::Time& time, const ros::Durat
   FeetController::updateCommand(time, period);
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros
 
-PLUGINLIB_EXPORT_CLASS(unitree_ros::LocomotionController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(cheetah_ros::LocomotionController, controller_interface::ControllerBase)

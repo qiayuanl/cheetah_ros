@@ -7,7 +7,7 @@
 using namespace std;
 using namespace chrono;
 
-using namespace unitree_ros;
+using namespace cheetah_ros;
 using namespace Eigen;
 
 int main()

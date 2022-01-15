@@ -9,7 +9,7 @@
 #include <qpOASES.hpp>
 #include <ros/ros.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class MpcSolverBase
 {
@@ -121,4 +121,4 @@ protected:
   }
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

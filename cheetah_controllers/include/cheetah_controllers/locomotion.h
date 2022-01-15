@@ -3,11 +3,11 @@
 //
 
 #pragma once
-#include <unitree_control/feet_controller.h>
+#include <cheetah_control/feet_controller.h>
 #include "mpc_solver.h"
 #include "gait.h"
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 class LocomotionController : public FeetController
 {
@@ -23,4 +23,4 @@ protected:
   const int horizon_ = 10;
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

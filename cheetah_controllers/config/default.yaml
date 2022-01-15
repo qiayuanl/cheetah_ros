@@ -3,7 +3,7 @@ controllers:
     type: joint_state_controller/JointStateController
     publish_rate: 100
   locomotion_controller:
-    type: unitree_ros/LocomotionController
+    type: cheetah_ros/LocomotionController
     feet:
       kp_stand: [ 50., 50., 50. ]
       kd_stand: [ 2.5, 2.5, 2.5 ]

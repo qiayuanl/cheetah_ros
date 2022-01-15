@@ -1,6 +1,6 @@
 <library path="lib/libcheetah_controllers">
 
-    <class name="unitree_ros/LocomotionController" type="unitree_ros::LocomotionController"
+    <class name="cheetah_ros/LocomotionController" type="cheetah_ros::LocomotionController"
            base_class_type="controller_interface::ControllerBase">
         <description>
             The locomotion controller.

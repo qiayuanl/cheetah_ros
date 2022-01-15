@@ -8,7 +8,7 @@
 
 #include <unsupported/Eigen/MatrixFunctions>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
 {
@@ -166,4 +166,4 @@ const VectorXd& MpcFormulation::buildLowerBound()
   return l_b_;
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

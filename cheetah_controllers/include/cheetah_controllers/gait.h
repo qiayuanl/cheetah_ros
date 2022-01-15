@@ -5,10 +5,10 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <unitree_control/cpp_types.h>
-#include <unitree_common/ros_utilities.h>
+#include <cheetah_control/cpp_types.h>
+#include <cheetah_common/ros_utilities.h>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 template <typename T>
 class OffsetDurationGait
@@ -111,4 +111,4 @@ private:
   }
 };
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

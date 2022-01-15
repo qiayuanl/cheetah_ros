@@ -3,13 +3,13 @@
 //
 #pragma once
 
-#include <unitree_control/cpp_types.h>
+#include <cheetah_control/cpp_types.h>
 
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-namespace unitree_ros
+namespace cheetah_ros
 {
 using Eigen::Dynamic;
 using Eigen::Matrix;
@@ -82,4 +82,4 @@ Vec3<T> quatToRPY(const Eigen::Quaternion<T>& q)
   return rpy;
 }
 
-}  // namespace unitree_ros
+}  // namespace cheetah_ros

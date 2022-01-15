@@ -15,7 +15,7 @@ find_package(catkin REQUIRED
         roscpp
         roslint
         controller_interface
-        unitree_control
+        cheetah_control
         qpoases_vendor
         )
 
@@ -31,7 +31,7 @@ catkin_package(
         roscpp
         roslint
         controller_interface
-        unitree_control
+        cheetah_control
         qpoases_vendor
 )
 
