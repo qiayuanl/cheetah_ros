@@ -10,7 +10,7 @@
 
 namespace cheetah_ros
 {
-void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight)
+void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha)
 {
   horizon_ = horizon;
   // Resize
@@ -19,6 +19,7 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   a_qp_.resize(STATE_DIM * horizon, Eigen::NoChange);
   b_qp_.resize(STATE_DIM * horizon, ACTION_DIM * horizon);
   l_.resize(STATE_DIM * horizon);
+  alpha_.resize(12 * horizon_, 12 * horizon_);
   h_.resize(ACTION_DIM * horizon, ACTION_DIM * horizon);
   g_.resize(ACTION_DIM * horizon, Eigen::NoChange);
   c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
@@ -32,6 +33,8 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   b_qp_.setZero();
   l_.setZero();
   l_.diagonal() = weight.replicate(horizon, 1);
+  alpha_.setIdentity();
+  alpha_ = alpha * alpha_;
 }
 
 // Converts a vector to the skew symmetric matrix form. For an input vector
@@ -110,7 +113,7 @@ void MpcFormulation::buildQp(double dt)
 
 const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildHessianMat()
 {
-  h_ = 2. * (b_qp_.transpose() * l_ * b_qp_);  // TODO: add K weight
+  h_ = 2. * (b_qp_.transpose() * l_ * b_qp_ + alpha_);
   return h_;
 }
 

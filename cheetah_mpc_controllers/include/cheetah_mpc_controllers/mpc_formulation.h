@@ -25,7 +25,7 @@ public:
   static constexpr int STATE_DIM = 13;   // 6 dof pose + 6 dof velocity + 1 gravity.
   static constexpr int ACTION_DIM = 12;  // 4 ground reaction force.
 
-  void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight);
+  void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha);
 
   void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
   void buildQp(double dt);
@@ -56,6 +56,7 @@ private:
   // Weight
   // L matrix: Diagonal matrix of weights for state deviations
   Eigen::DiagonalMatrix<double, Eigen::Dynamic, Eigen::Dynamic> l_;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> alpha_;  // u cost
 };
 
 template <typename T>

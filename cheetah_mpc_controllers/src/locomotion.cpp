@@ -26,7 +26,7 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
 
-  solver_->setup(0.03, horizon_, 666., weight);
+  solver_->setup(0.03, horizon_, 666., weight, 1e-6);
 
   return true;
 }

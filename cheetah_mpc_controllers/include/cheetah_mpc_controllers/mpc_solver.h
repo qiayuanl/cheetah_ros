@@ -21,12 +21,12 @@ public:
     solution_.resize(4);
   }
 
-  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight)
+  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha)
   {
     std::lock_guard<std::mutex> guard(mutex_);
     dt_ = dt;
     f_max_ = f_max;
-    mpc_formulation_.setup(horizon, weight);
+    mpc_formulation_.setup(horizon, weight, alpha);
   }
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
@@ -104,7 +104,7 @@ protected:
     options.setToMPC();
     options.printLevel = qpOASES::PL_NONE;
     qp_problem.setOptions(options);
-    int n_wsr = 100;
+    int n_wsr = 200;
     qpOASES::returnValue rvalue =
         qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
                         nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
