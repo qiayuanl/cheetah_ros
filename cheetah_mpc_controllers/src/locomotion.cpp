@@ -18,11 +18,11 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
     name2gaits_.insert(
         std::make_pair(gait_params.first.c_str(), std::make_shared<OffsetDurationGaitRos<double>>(gait_params.second)));
 
-  double mass = 22.637;
+  double mass = 21.5;
   Matrix3d inertia;
   inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
 
-  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.5, inertia);
+  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.3, inertia);
 
   gait_ = name2gaits_.begin()->second;
 
@@ -85,6 +85,7 @@ void LocomotionController::dynamicCallback(WeightConfig& config, uint32_t /*leve
       config.rate_roll, config.rate_pitch, config.rate_yaw, config.vel_x, config.vel_y, config.vel_z, 0.;
 
   solver_->setup(gait_->getCycle() / static_cast<double>(config.horizon), config.horizon, 666., weight, config.alpha);
+  ROS_INFO("[Mpc] Dynamic params update");
 }
 
 }  // namespace cheetah_ros
