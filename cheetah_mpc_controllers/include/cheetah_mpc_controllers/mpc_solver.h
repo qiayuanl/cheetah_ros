@@ -31,7 +31,11 @@ public:
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
   {
-    if ((time - last_update_).toSec() > dt_ && time > ros::Time(0))
+    double dt = (time - last_update_).toSec();
+
+    if (dt < 0)  // Simulation reset
+      last_update_ = time;
+    if (dt > dt_)
     {
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
