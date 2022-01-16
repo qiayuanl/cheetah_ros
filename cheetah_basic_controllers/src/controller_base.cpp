@@ -38,7 +38,7 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   state_pub_ =
       std::make_shared<realtime_tools::RealtimePublisher<cheetah_msgs::LegsState>>(controller_nh, "/leg_states", 100);
 
-  state_estimate_ = std::make_shared<GroundTruth>(controller_nh);  // TODO add interface
+  state_estimate_ = std::make_shared<FromTopicStateEstimate>(controller_nh);  // TODO add interface
   return true;
 }
 

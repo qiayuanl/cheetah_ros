@@ -5,17 +5,17 @@
 
 namespace cheetah_ros
 {
-GroundTruth::GroundTruth(ros::NodeHandle& nh) : StateEstimateBase(nh)
+FromTopicStateEstimate::FromTopicStateEstimate(ros::NodeHandle& nh) : StateEstimateBase(nh)
 {
-  sub_ = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state", 100, &GroundTruth::callback, this);
+  sub_ = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state", 100, &FromTopicStateEstimate::callback, this);
 }
 
-void GroundTruth::callback(const nav_msgs::Odometry::ConstPtr& msg)
+void FromTopicStateEstimate::callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
   buffer_.writeFromNonRT(*msg);
 }
 
-void GroundTruth::update(RobotState& state)
+void FromTopicStateEstimate::update(RobotState& state)
 {
   nav_msgs::Odometry odom = *buffer_.readFromRT();
   state.pos_ << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;

@@ -21,11 +21,11 @@ public:
   virtual void update(RobotState& state){};
 };
 
-class GroundTruth : public StateEstimateBase
+class FromTopicStateEstimate : public StateEstimateBase
 {
 public:
-  GroundTruth(ros::NodeHandle& nh);
-  ~GroundTruth() override{};
+  FromTopicStateEstimate(ros::NodeHandle& nh);
+  ~FromTopicStateEstimate() override{};
 
   void update(RobotState& state) override;
 
