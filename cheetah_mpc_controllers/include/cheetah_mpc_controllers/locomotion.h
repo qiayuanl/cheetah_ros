@@ -6,6 +6,7 @@
 #include <cheetah_basic_controllers/feet_controller.h>
 #include "mpc_solver.h"
 #include "gait.h"
+#include "cheetah_mpc_controllers/WeightConfig.h"
 
 namespace cheetah_ros
 {
@@ -17,10 +18,14 @@ public:
   void updateData(const ros::Time& time, const ros::Duration& period) override;
   void updateCommand(const ros::Time& time, const ros::Duration& period) override;
 
-protected:
+private:
+  void dynamicCallback(cheetah_ros::WeightConfig& config, uint32_t /*level*/);
+
   std::map<std::string, OffsetDurationGaitRos<double>::Ptr> name2gaits_;
+  OffsetDurationGaitRos<double>::Ptr gait_;
   std::shared_ptr<MpcSolverBase> solver_;
-  const int horizon_ = 10;
+  // Dynamic reconfigure
+  std::shared_ptr<dynamic_reconfigure::Server<cheetah_ros::WeightConfig>> dynamic_srv_{};
 };
 
 }  // namespace cheetah_ros

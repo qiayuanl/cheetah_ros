@@ -18,15 +18,21 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
     name2gaits_.insert(
         std::make_pair(gait_params.first.c_str(), std::make_shared<OffsetDurationGaitRos<double>>(gait_params.second)));
 
-  double mass = 11.041;
+  double mass = 22.637;
   Matrix3d inertia;
   inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
 
-  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.3, inertia);
-  Matrix<double, 13, 1> weight;
-  weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
+  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.5, inertia);
 
-  solver_->setup(0.03, horizon_, 666., weight, 1e-6);
+  gait_ = name2gaits_.begin()->second;
+
+  // Dynamic reconfigure
+  ros::NodeHandle nh_mpc = ros::NodeHandle(controller_nh, "mpc");
+  dynamic_srv_ = std::make_shared<dynamic_reconfigure::Server<cheetah_ros::WeightConfig>>(nh_mpc);
+  dynamic_reconfigure::Server<cheetah_ros::WeightConfig>::CallbackType cb = [this](auto&& PH1, auto&& PH2) {
+    dynamicCallback(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
+  };
+  dynamic_srv_->setCallback(cb);
 
   return true;
 }
@@ -38,22 +44,21 @@ void LocomotionController::updateData(const ros::Time& time, const ros::Duration
 
 void LocomotionController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
-  auto gait = name2gaits_.begin()->second;
-  gait->update(time);
-  Vec4<int> contact_state_desired = gait->getContactState();
-  Vec4<double> swing_time = gait->getSwingTime();
+  gait_->update(time);
+  Vec4<int> contact_state_desired = gait_->getContactState();
+  Vec4<double> swing_time = gait_->getSwingTime();
   double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
   double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
 
-  Eigen::VectorXd traj;
-  traj.resize(12 * horizon_);
-  traj.setZero();
-  for (int i = 0; i < horizon_; ++i)
-  {
-    traj[12 * i + 5] = 0.35;
-  }
+  int horizon = solver_->getHorizon();
 
-  solver_->solve(time, robot_state_, gait->getMpcTable(horizon_), traj);
+  Eigen::VectorXd traj;
+  traj.resize(12 * horizon);
+  traj.setZero();
+  for (int i = 0; i < horizon; ++i)
+    traj[12 * i + 5] = 0.35;
+
+  solver_->solve(time, robot_state_, gait_->getMpcTable(horizon), traj);
   std::vector<Vec3<double>> solution = solver_->getSolution();
 
   for (int j = 0; j < 4; ++j)
@@ -65,12 +70,21 @@ void LocomotionController::updateCommand(const ros::Time& time, const ros::Durat
     else if (contact_state_desired[j] == 0 && getFootState(leg) == STAND)
     {
       Eigen::Vector3d pos;
-      pos << sign_fr[j] * 0.25, sign_lr[j] * 0.2, 0.;
-      setSwing(leg, pos, 0.1, swing_time[j]);
+      pos << sign_fr[j] * 0.25, sign_lr[j] * 0.15, 0.0265;
+      setSwing(leg, pos, 0.15, swing_time[j]);
     }
   }
 
   FeetController::updateCommand(time, period);
+}
+
+void LocomotionController::dynamicCallback(WeightConfig& config, uint32_t /*level*/)  // TODO: real time safe
+{
+  Matrix<double, 13, 1> weight;
+  weight << config.ori_roll, config.ori_pitch, config.ori_yaw, config.pos_x, config.pos_y, config.pos_z,
+      config.rate_roll, config.rate_pitch, config.rate_yaw, config.vel_x, config.vel_y, config.vel_z, 0.;
+
+  solver_->setup(gait_->getCycle() / static_cast<double>(config.horizon), config.horizon, 666., weight, config.alpha);
 }
 
 }  // namespace cheetah_ros

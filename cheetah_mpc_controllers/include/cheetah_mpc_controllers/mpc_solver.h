@@ -54,6 +54,11 @@ public:
     return solution_;
   }
 
+  int getHorizon()
+  {
+    return mpc_formulation_.horizon_;
+  }
+
 protected:
   void solvingThread()
   {

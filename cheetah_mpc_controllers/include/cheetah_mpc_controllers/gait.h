@@ -77,6 +77,11 @@ public:
     return durations_ * cycle_;
   }
 
+  T getCycle()
+  {
+    return cycle_;
+  }
+
 private:
   T cycle_, phase_;
 

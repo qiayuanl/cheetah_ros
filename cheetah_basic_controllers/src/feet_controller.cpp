@@ -28,7 +28,8 @@ bool FeetController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
       controller_nh.subscribe<cheetah_msgs::FeetCmd>("/cmd_feet", 1, &FeetController::feetCmdCallback, this);
 
   // Dynamic reconfigure
-  dynamic_srv_ = std::make_shared<dynamic_reconfigure::Server<cheetah_ros::FeetConfig>>(controller_nh);
+  ros::NodeHandle nh_feet = ros::NodeHandle(controller_nh, "feet");
+  dynamic_srv_ = std::make_shared<dynamic_reconfigure::Server<cheetah_ros::FeetConfig>>(nh_feet);
   dynamic_reconfigure::Server<cheetah_ros::FeetConfig>::CallbackType cb = [this](auto&& PH1, auto&& PH2) {
     dynamicCallback(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2));
   };

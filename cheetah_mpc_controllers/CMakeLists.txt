@@ -22,6 +22,10 @@ find_package(catkin REQUIRED
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(pinocchio REQUIRED pinocchio)
 
+generate_dynamic_reconfigure_options(
+        cfg/Weight.cfg
+)
+
 catkin_package(
         INCLUDE_DIRS
         include
@@ -62,6 +66,10 @@ link_directories(
 add_library(${PROJECT_NAME}
         src/mpc_formulation.cpp
         src/locomotion.cpp
+        )
+
+add_dependencies(${PROJECT_NAME}
+        ${PROJECT_NAME}_gencfg
         )
 
 target_link_libraries(${PROJECT_NAME}
