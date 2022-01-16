@@ -102,11 +102,17 @@ protected:
     auto qp_problem = qpOASES::QProblem(12 * mpc_formulation_.horizon_, 20 * mpc_formulation_.horizon_);
     qpOASES::Options options;
     options.setToMPC();
-    options.printLevel = qpOASES::PL_LOW;
+    options.printLevel = qpOASES::PL_NONE;
     qp_problem.setOptions(options);
-    int n_wsr = 1000;
-    qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
-                    nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
+    int n_wsr = 100;
+    qpOASES::returnValue rvalue =
+        qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
+                        nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
+    printFailedInit(rvalue);
+
+    if (rvalue != qpOASES::SUCCESSFUL_RETURN)
+      return;
+
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
 
     if (qp_problem.getPrimalSolution(qp_sol.data()) != qpOASES::SUCCESSFUL_RETURN)
@@ -117,6 +123,39 @@ protected:
       solution_[leg].x() = qp_sol[3 * leg];
       solution_[leg].y() = qp_sol[3 * leg + 1];
       solution_[leg].z() = qp_sol[3 * leg + 2];
+    }
+  }
+
+  void printFailedInit(qpOASES::returnValue rvalue)
+  {
+    switch (rvalue)
+    {
+      case qpOASES::RET_INIT_FAILED:
+        ROS_WARN("MPC init failed");
+        break;
+      case qpOASES::RET_INIT_FAILED_CHOLESKY:
+        ROS_WARN("MPC init failed with: RET_INIT_FAILED_CHOLESKY");
+        break;
+      case qpOASES::RET_INIT_FAILED_TQ:
+        ROS_WARN("MPC init failed with: RET_INIT_FAILED_CHOLESKY");
+        break;
+      case qpOASES::RET_INIT_FAILED_HOTSTART:
+        ROS_WARN("MPC init failed: RET_INIT_FAILED_HOTSTART");
+        break;
+      case qpOASES::RET_INIT_FAILED_INFEASIBILITY:
+        ROS_WARN("MPC init failed: RET_INIT_FAILED_INFEASIBILITY");
+        break;
+      case qpOASES::RET_INIT_FAILED_UNBOUNDEDNESS:
+        ROS_WARN("MPC init failed: RET_INIT_FAILED_UNBOUNDEDNESS");
+        break;
+      case qpOASES::RET_MAX_NWSR_REACHED:
+        ROS_WARN("MPC init failed: RET_MAX_NWSR_REACHED");
+        break;
+      case qpOASES::RET_INVALID_ARGUMENTS:
+        ROS_WARN("MPC init failed: RET_INVALID_ARGUMENTS");
+        break;
+      default:
+        break;
     }
   }
 };
