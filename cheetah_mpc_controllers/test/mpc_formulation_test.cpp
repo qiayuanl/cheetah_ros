@@ -15,12 +15,12 @@ using namespace Eigen;
 
 int main()
 {
-  int horizon = 18;
+  int horizon = 10;
   MpcFormulation mpc_formulation;
 
   Matrix<double, 13, 1> weight;
   weight << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2, 0.;
-  mpc_formulation.setup(horizon, weight);
+  mpc_formulation.setup(horizon, weight, 1e-6);
 
   // State space
   double mass = 11.041;

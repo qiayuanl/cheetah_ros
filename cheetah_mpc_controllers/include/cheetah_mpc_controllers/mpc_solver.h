@@ -111,7 +111,11 @@ protected:
     printFailedInit(rvalue);
 
     if (rvalue != qpOASES::SUCCESSFUL_RETURN)
+    {
+      for (auto& solution : solution_)
+        solution.setZero();
       return;
+    }
 
     std::vector<qpOASES::real_t> qp_sol(12 * mpc_formulation_.horizon_, 0);
 
