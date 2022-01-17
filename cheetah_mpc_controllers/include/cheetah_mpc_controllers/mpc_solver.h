@@ -63,6 +63,11 @@ public:
     return mpc_formulation_.horizon_;
   }
 
+  double getDt()
+  {
+    return dt_;
+  };
+
 protected:
   void solvingThread()
   {

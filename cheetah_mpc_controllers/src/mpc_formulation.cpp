@@ -68,7 +68,7 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   a_c_(5, 11) = 1.;
   a_c_(11, 12) = 1.;
 
-  Matrix3d inertia_world = rot * inertia * rot.transpose();
+  Matrix3d inertia_world = rot.transpose() * inertia * rot;
   //  b contains non_zero elements only in row 6 : 12.
   for (int i = 0; i < 4; ++i)
   {

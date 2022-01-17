@@ -34,6 +34,8 @@ bool LocomotionController::init(hardware_interface::RobotHW* robot_hw, ros::Node
   };
   dynamic_srv_->setCallback(cb);
 
+  traj_sub_ =
+      controller_nh.subscribe<trajectory_msgs::JointTrajectory>("/traj", 1, &LocomotionController::trajCallback, this);
   return true;
 }
 
@@ -51,12 +53,40 @@ void LocomotionController::updateCommand(const ros::Time& time, const ros::Durat
   double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
 
   int horizon = solver_->getHorizon();
+  double dt = solver_->getDt();
 
   Eigen::VectorXd traj;
   traj.resize(12 * horizon);
   traj.setZero();
-  for (int i = 0; i < horizon; ++i)
-    traj[12 * i + 5] = 0.35;
+  const trajectory_msgs::JointTrajectory traj_msg = *traj_buffer_.readFromRT();
+  auto point = traj_msg.points.begin();
+  for (int h = 0; h < horizon; ++h)
+    while ((traj_msg.header.stamp + point->time_from_start) < time + ros::Duration(horizon * dt))
+    {
+      int i = 0;
+      for (size_t name = 0; name < traj_msg.joint_names.size(); ++name)
+      {
+        if (traj_msg.joint_names[name] == "roll")
+          i = 0;
+        else if (traj_msg.joint_names[name] == "pitch")
+          i = 1;
+        else if (traj_msg.joint_names[name] == "yaw")
+          i = 2;
+        else if (traj_msg.joint_names[name] == "x")
+          i = 3;
+        else if (traj_msg.joint_names[name] == "y")
+          i = 4;
+        else if (traj_msg.joint_names[name] == "z")
+          i = 5;
+        for (int j = h; j < horizon; ++j)
+        {
+          traj[12 * j + i] = point->positions[name];
+          traj[12 * j + i + 6] = point->velocities[name];
+        }
+      }
+      if (++point == traj_msg.points.end())
+        break;
+    }
 
   solver_->solve(time, robot_state_, gait_->getMpcTable(horizon), traj);
   std::vector<Vec3<double>> solution = solver_->getSolution();
@@ -86,6 +116,11 @@ void LocomotionController::dynamicCallback(WeightConfig& config, uint32_t /*leve
 
   solver_->setup(gait_->getCycle() / static_cast<double>(config.horizon), config.horizon, 666., weight, config.alpha);
   ROS_INFO("[Mpc] Dynamic params update");
+}
+
+void LocomotionController::trajCallback(const trajectory_msgs::JointTrajectory::ConstPtr& msg)
+{
+  traj_buffer_.writeFromNonRT(*msg);
 }
 
 }  // namespace cheetah_ros

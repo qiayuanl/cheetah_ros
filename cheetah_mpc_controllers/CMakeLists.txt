@@ -17,6 +17,7 @@ find_package(catkin REQUIRED
         controller_interface
         cheetah_basic_controllers
         qpoases_vendor
+        trajectory_msgs
         )
 
 find_package(PkgConfig REQUIRED)
@@ -37,6 +38,7 @@ catkin_package(
         controller_interface
         cheetah_basic_controllers
         qpoases_vendor
+        trajectory_msgs
 )
 
 ###########
