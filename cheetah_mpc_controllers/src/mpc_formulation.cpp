@@ -55,7 +55,7 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   Vector3d rpy = quatToRPY(state.quat_);
   double yaw_cos = std::cos(rpy(2));
   double yaw_sin = std::sin(rpy(2));
-  rot << yaw_cos, -yaw_sin, 0, yaw_sin, yaw_cos, 0, 0, 0, 1;
+  rot << yaw_cos, yaw_sin, 0, -yaw_sin, yaw_cos, 0, 0, 0, 1;
 
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
@@ -68,10 +68,11 @@ void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const
   a_c_(5, 11) = 1.;
   a_c_(11, 12) = 1.;
 
+  Matrix3d inertia_world = rot * inertia * rot.transpose();
   //  b contains non_zero elements only in row 6 : 12.
   for (int i = 0; i < 4; ++i)
   {
-    b_c_.block<3, 3>(6, i * 3) = inertia.inverse() * convertToSkewSymmetric(r_feet.col(i));
+    b_c_.block<3, 3>(6, i * 3) = inertia_world.inverse() * convertToSkewSymmetric(r_feet.col(i));
     b_c_.block(9, i * 3, 3, 3) = Matrix<double, 3, 3>::Identity() / mass;
   }
 }
