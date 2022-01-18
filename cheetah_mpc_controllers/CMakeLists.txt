@@ -68,6 +68,7 @@ link_directories(
 add_library(${PROJECT_NAME}
         src/mpc_formulation.cpp
         src/locomotion.cpp
+        src/jump_controller.cpp
         )
 
 add_dependencies(${PROJECT_NAME}
