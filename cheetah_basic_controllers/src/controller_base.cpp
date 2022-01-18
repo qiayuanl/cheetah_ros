@@ -49,6 +49,17 @@ void ControllerBase::update(const ros::Time& time, const ros::Duration& period)
   publishState(time, period);
 }
 
+void ControllerBase::stopping(const ros::Time& /*time*/)
+{
+  for (auto& leg_joint : leg_joints_)
+    for (auto& joint : leg_joint.joints_)
+    {
+      joint.setKp(0.);
+      joint.setKd(0.);
+      joint.setFeedforward(0.);
+    }
+}
+
 void ControllerBase::updateData(const ros::Time& time, const ros::Duration& period)
 {
   if (state_estimate_ != nullptr)
