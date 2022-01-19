@@ -95,4 +95,10 @@ target_link_libraries(mpc_solver_test
         ${PROJECT_NAME}
         )
 
+add_executable(trajectory_test test/trajectory_test.cpp)
+target_link_libraries(trajectory_test
+        ${catkin_LIBRARIES}
+        )
+add_dependencies(trajectory_test ${PROJECT_NAME})
+
 roslint_cpp()
