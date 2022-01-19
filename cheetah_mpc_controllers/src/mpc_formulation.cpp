@@ -51,24 +51,24 @@ Matrix3d convertToSkewSymmetric(const Vector3d& vec)
 
 void MpcFormulation::buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state)
 {
-  Matrix3d rot;
+  Matrix3d angular_velocity_to_rpy_rate;
   Vector3d rpy = quatToRPY(state.quat_);
   double yaw_cos = std::cos(rpy(2));
   double yaw_sin = std::sin(rpy(2));
-  rot << yaw_cos, yaw_sin, 0, -yaw_sin, yaw_cos, 0, 0, 0, 1;
+  angular_velocity_to_rpy_rate << yaw_cos, yaw_sin, 0, -yaw_sin, yaw_cos, 0, 0, 0, 1;
 
   Matrix<double, 3, 4> r_feet;
   for (int i = 0; i < 4; ++i)
     r_feet.col(i) = state.foot_pos_[i] - state.pos_;
 
-  a_c_.block<3, 3>(0, 6) = rot;
+  a_c_.block<3, 3>(0, 6) = angular_velocity_to_rpy_rate;
 
   a_c_(3, 9) = 1.;
   a_c_(4, 10) = 1.;
   a_c_(5, 11) = 1.;
   a_c_(11, 12) = 1.;
 
-  Matrix3d inertia_world = rot.transpose() * inertia * rot;
+  Matrix3d inertia_world = angular_velocity_to_rpy_rate.transpose() * inertia * angular_velocity_to_rpy_rate;
   //  b contains non_zero elements only in row 6 : 12.
   for (int i = 0; i < 4; ++i)
   {

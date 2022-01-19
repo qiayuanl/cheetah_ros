@@ -15,6 +15,6 @@ controllers:
         offsets: [ 0., 0.5, 0.5, 0. ]
         durations: [ 0.5, 0.5, 0.5, 0.5 ]
       hold:
-        cycle: 0.3
+        cycle: 0.05
         offsets: [ 0., 0., 0., 0. ]
         durations: [ 1., 1., 1., 1. ]

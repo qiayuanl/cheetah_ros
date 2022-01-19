@@ -26,7 +26,14 @@ public:
     std::lock_guard<std::mutex> guard(mutex_);
     dt_ = dt;
     f_max_ = f_max;
+    weight_ = weight;
+    alpha_ = alpha;
     mpc_formulation_.setup(horizon, weight, alpha);
+  }
+
+  void setHorizon(int horizon)
+  {
+    setup(dt_, horizon, f_max_, weight_, alpha_);
   }
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
@@ -103,6 +110,10 @@ private:
   RobotState state_;
   Matrix<double, Dynamic, 1> traj_;
   VectorXd gait_table_;
+
+  // Only for setHorizon()
+  Matrix<double, 13, 1> weight_;
+  double alpha_;
 };
 
 class QpOasesSolver : public MpcSolverBase
