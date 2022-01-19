@@ -97,7 +97,7 @@ void ControllerBase::updateCommand(const ros::Time& time, const ros::Duration& p
   for (size_t j = 0; j < cmd_msgs.leg_prefix.size(); ++j)
   {
     LegCmd& cmd = leg_cmd_[cmd_msgs.leg_prefix[j].prefix];
-    if (cmd_msgs.header.stamp >= cmd.stamp_)
+    if (cmd_msgs.header.stamp > cmd.stamp_)
     {
       cmd.stamp_ = cmd_msgs.header.stamp;
       cmd.foot_pos_des_ << cmd_msgs.foot_pos_des[j].x, cmd_msgs.foot_pos_des[j].y, cmd_msgs.foot_pos_des[j].z;

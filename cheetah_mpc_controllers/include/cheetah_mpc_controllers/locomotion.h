@@ -24,6 +24,7 @@ protected:
   void setTraj(const Eigen::VectorXd& traj);
   // TODO: Add setFootPlace() and setGait()
   std::shared_ptr<MpcSolverBase> solver_;
+  int horizon_;
 
 private:
   void dynamicCallback(cheetah_ros::WeightConfig& config, uint32_t /*level*/);

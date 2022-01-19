@@ -23,17 +23,17 @@ public:
 
   void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha)
   {
-    std::lock_guard<std::mutex> guard(mutex_);
     dt_ = dt;
     f_max_ = f_max;
     weight_ = weight;
     alpha_ = alpha;
+    horizon_ = horizon;
     mpc_formulation_.setup(horizon, weight, alpha);
   }
 
   void setHorizon(int horizon)
   {
-    setup(dt_, horizon, f_max_, weight_, alpha_);
+    horizon_ = horizon;
   }
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
@@ -47,6 +47,9 @@ public:
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
       {
+        if (horizon_ != mpc_formulation_.horizon_)
+          setup(dt_, horizon_, f_max_, weight_, alpha_);
+
         last_update_ = time;
         state_ = state;
         gait_table_ = gait_table;
@@ -90,6 +93,7 @@ protected:
 
   std::mutex mutex_;
   std::shared_ptr<std::thread> thread_;
+  int horizon_;
 
 private:
   void formulate()

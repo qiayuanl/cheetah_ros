@@ -18,32 +18,48 @@ bool JumpController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
 void JumpController::updateCommand(const ros::Time& time, const ros::Duration& period)
 {
   const trajectory_msgs::JointTrajectory traj_msg = *traj_buffer_.readFromRT();
-  if (time < traj_msg.header.stamp || time > traj_msg.header.stamp + traj_msg.points.back().time_from_start)
+  if (time < traj_msg.header.stamp ||
+      time > traj_msg.header.stamp + traj_msg.points.back().time_from_start + ros::Duration(solver_->getDt()))
   {
-    Eigen::Vector3d zero_force;
-    zero_force.setZero();
+    double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
+    double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
+
     for (int i = 0; i < 4; ++i)
-      setStand(LegPrefix(i), zero_force);
+    {
+      Eigen::Vector3d pos;
+      pos << sign_fr[i] * 0.25, sign_lr[i] * 0.15, -0.05;
+      pos += robot_state_.pos_;
+      LegCmd leg_cmd;
+      leg_cmd.foot_pos_des_ = pos;
+      leg_cmd.foot_vel_des_.setZero();
+      leg_cmd.kp_cartesian_ << 800., 0, 0, 0, 800., 0, 0, 0, 800.;
+      leg_cmd.kd_cartesian_ << 10., 0, 0, 0, 10., 0, 0, 0, 10.;
+      setLegCmd(LegPrefix(i), leg_cmd);
+    }
+
+    solver_->setHorizon(horizon_);
+    ControllerBase::updateCommand(time, period);
     return;
   }
 
-  int horizon = solver_->getHorizon();
   double dt = solver_->getDt();
 
   Eigen::VectorXd traj;
-  traj.resize(12 * horizon);
+  traj.resize(12 * horizon_);
   traj.setZero();
-  for (int h = 0; h < horizon; ++h)
+  for (int h = 0; h < horizon_; ++h)
   {
-    auto point = traj_msg.points.begin();
-    while (time + ros::Duration(h * dt) > traj_msg.header.stamp + point->time_from_start)
+    auto point = traj_msg.points.begin() + 1;
+    while (point != traj_msg.points.end())
     {
-      if (++point == traj_msg.points.end())
+      if (time + ros::Duration(h * dt) < traj_msg.header.stamp + point->time_from_start &&
+          time + ros::Duration(h * dt) >= traj_msg.header.stamp + (point - 1)->time_from_start)
         break;
+      ++point;
     }
     if (point == traj_msg.points.end())
     {
-      if (h < horizon - 1)
+      if (h < horizon_ - 1)
         solver_->setHorizon(h + 1);
       break;
     }

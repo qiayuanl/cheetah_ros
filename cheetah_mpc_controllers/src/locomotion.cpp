@@ -20,7 +20,7 @@ bool LocomotionBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   Matrix3d inertia;
   inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
 
-  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.3, inertia);
+  solver_ = std::make_shared<QpOasesSolver>(mass, -9.81, 0.6, inertia);
 
   gait_ = name2gaits_.begin()->second;
   traj_.setZero();
@@ -73,8 +73,8 @@ void LocomotionBase::dynamicCallback(WeightConfig& config, uint32_t /*level*/)  
   Matrix<double, 13, 1> weight;
   weight << config.ori_roll, config.ori_pitch, config.ori_yaw, config.pos_x, config.pos_y, config.pos_z,
       config.rate_roll, config.rate_pitch, config.rate_yaw, config.vel_x, config.vel_y, config.vel_z, 0.;
-
-  solver_->setup(gait_->getCycle() / static_cast<double>(config.horizon), config.horizon, 666., weight, config.alpha);
+  horizon_ = config.horizon;
+  solver_->setup(gait_->getCycle() / static_cast<double>(config.horizon), config.horizon, 200., weight, config.alpha);
   ROS_INFO("[Mpc] Dynamic params update");
 }
 
