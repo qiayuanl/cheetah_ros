@@ -3,6 +3,8 @@
 //
 #include "cheetah_mpc_controllers/locomotion.h"
 
+#include <pluginlib/class_list_macros.hpp>
+
 namespace cheetah_ros
 {
 bool LocomotionBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& controller_nh)
@@ -44,6 +46,14 @@ void LocomotionBase::updateCommand(const ros::Time& time, const ros::Duration& p
   double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
   double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
 
+  //  traj_.resize(12 * horizon_);
+  //  traj_.setZero();
+  //  for (int i = 0; i < horizon_; ++i)
+  //  {
+  //    traj_[12 * i + 2] = M_PI_2;
+  //    traj_[12 * i + 5] = 0.35;
+  //  }
+
   solver_->solve(time, robot_state_, gait_->getMpcTable(solver_->getHorizon()), traj_);
   std::vector<Vec3<double>> solution = solver_->getSolution();
 
@@ -79,3 +89,5 @@ void LocomotionBase::dynamicCallback(WeightConfig& config, uint32_t /*level*/)  
 }
 
 }  // namespace cheetah_ros
+
+PLUGINLIB_EXPORT_CLASS(cheetah_ros::LocomotionBase, controller_interface::ControllerBase)

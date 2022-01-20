@@ -15,7 +15,6 @@
     <depend>controller_interface</depend>
     <depend>cheetah_basic_controllers</depend>
     <depend>qpoases_vendor</depend>
-    <depend>trajectory_msgs</depend>
 
     <exec_depend>controller_manager</exec_depend>
 

@@ -14,10 +14,8 @@ find_package(catkin REQUIRED
         COMPONENTS
         roscpp
         roslint
-        controller_interface
         cheetah_basic_controllers
         qpoases_vendor
-        trajectory_msgs
         )
 
 find_package(PkgConfig REQUIRED)
@@ -35,10 +33,8 @@ catkin_package(
         CATKIN_DEPENDS
         roscpp
         roslint
-        controller_interface
         cheetah_basic_controllers
         qpoases_vendor
-        trajectory_msgs
 )
 
 ###########
@@ -68,7 +64,6 @@ link_directories(
 add_library(${PROJECT_NAME}
         src/mpc_formulation.cpp
         src/locomotion.cpp
-        src/jump_controller.cpp
         )
 
 add_dependencies(${PROJECT_NAME}
@@ -94,11 +89,5 @@ target_link_libraries(mpc_solver_test
         ${catkin_LIBRARIES}
         ${PROJECT_NAME}
         )
-
-add_executable(trajectory_test test/trajectory_test.cpp)
-target_link_libraries(trajectory_test
-        ${catkin_LIBRARIES}
-        )
-add_dependencies(trajectory_test ${PROJECT_NAME})
 
 roslint_cpp()

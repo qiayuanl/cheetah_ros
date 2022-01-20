@@ -2,8 +2,8 @@ controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
     publish_rate: 100
-  jump_controller:
-    type: cheetah_ros/JumpController
+  locomotion_controller:
+    type: cheetah_ros/LocomotionBase
     feet:
       kp_stand: [ 50., 50., 50. ]
       kd_stand: [ 2.5, 2.5, 2.5 ]
@@ -15,6 +15,6 @@ controllers:
         offsets: [ 0., 0.5, 0.5, 0. ]
         durations: [ 0.5, 0.5, 0.5, 0.5 ]
       hold:
-        cycle: 0.06
+        cycle: 0.3
         offsets: [ 0., 0., 0., 0. ]
         durations: [ 1., 1., 1., 1. ]

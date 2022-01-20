@@ -1,6 +1,6 @@
 <library path="lib/libcheetah_mpc_controllers">
 
-    <class name="cheetah_ros/JumpController" type="cheetah_ros::JumpController"
+    <class name="cheetah_ros/LocomotionBase" type="cheetah_ros::LocomotionBase"
            base_class_type="controller_interface::ControllerBase">
         <description>
             The jump controller.

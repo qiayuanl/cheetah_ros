@@ -105,8 +105,6 @@ private:
     mpc_formulation_.buildConstrainMat(mu_);
     mpc_formulation_.buildConstrainUpperBound(f_max_, gait_table_);
     mpc_formulation_.buildConstrainLowerBound();
-    ROS_INFO_STREAM(traj_);
-    ROS_INFO_STREAM(getHorizon());
     mpc_formulation_.buildStateUpperBound(traj_.block<12, 1>(12 * (mpc_formulation_.horizon_ - 1), 0));
     mpc_formulation_.buildStateLowerBound(traj_.block<12, 1>(12 * (getHorizon() - 1), 0));
   }
