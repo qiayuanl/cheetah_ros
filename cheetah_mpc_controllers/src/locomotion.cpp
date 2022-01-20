@@ -35,6 +35,11 @@ bool LocomotionBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   };
   dynamic_srv_->setCallback(cb);
 
+  traj_.resize(12 * horizon_);
+  traj_.setZero();
+  for (int i = 0; i < horizon_; ++i)
+    traj_[12 * i + 5] = 0.35;
+
   return true;
 }
 
@@ -45,14 +50,6 @@ void LocomotionBase::updateCommand(const ros::Time& time, const ros::Duration& p
   Vec4<double> swing_time = gait_->getSwingTime();
   double sign_fr[4] = { 1.0, 1.0, -1.0, -1.0 };
   double sign_lr[4] = { 1.0, -1.0, 1.0, -1.0 };
-
-  //  traj_.resize(12 * horizon_);
-  //  traj_.setZero();
-  //  for (int i = 0; i < horizon_; ++i)
-  //  {
-  //    traj_[12 * i + 2] = M_PI_2;
-  //    traj_[12 * i + 5] = 0.35;
-  //  }
 
   solver_->solve(time, robot_state_, gait_->getMpcTable(solver_->getHorizon()), traj_);
   std::vector<Vec3<double>> solution = solver_->getSolution();
