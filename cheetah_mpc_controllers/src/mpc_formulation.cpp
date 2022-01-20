@@ -174,12 +174,16 @@ const VectorXd& MpcFormulation::buildConstrainLowerBound()
 const VectorXd& MpcFormulation::buildStateUpperBound(const Matrix<double, Dynamic, 1>& final_state)
 {
   ub_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, BIG_VALUE);
+  //  for (int i = 0; i < 12; ++i)
+  //    ub_[(horizon_ - 1) * STATE_DIM + i] = final_state[i];
   return ub_;
 }
 
 const VectorXd& MpcFormulation::buildStateLowerBound(const Matrix<double, Dynamic, 1>& final_state)
 {
   lb_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, -BIG_VALUE);
+  //  for (int i = 0; i < 12; ++i)
+  //    lb_[(horizon_ - 1) * STATE_DIM + i] = final_state[i];
   return lb_;
 }
 

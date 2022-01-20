@@ -134,6 +134,7 @@ protected:
         qpOASES::QProblem(12 * mpc_formulation_.horizon_, 20 * mpc_formulation_.horizon_);  // TODO: Test SQProblem
     qpOASES::Options options;
     options.setToMPC();
+    //    options.enableEqualities = qpOASES::BT_TRUE;
     options.printLevel = qpOASES::PL_NONE;
     qp_problem.setOptions(options);
     int n_wsr = 100;
