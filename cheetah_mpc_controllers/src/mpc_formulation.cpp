@@ -22,9 +22,11 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   alpha_.resize(12 * horizon_, 12 * horizon_);
   h_.resize(ACTION_DIM * horizon, ACTION_DIM * horizon);
   g_.resize(ACTION_DIM * horizon, Eigen::NoChange);
-  c_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
-  u_b_.resize(5 * 4 * horizon, Eigen::NoChange);
-  l_b_.resize(5 * 4 * horizon, Eigen::NoChange);
+  a_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
+  ub_a_.resize(5 * 4 * horizon, Eigen::NoChange);
+  lb_a_.resize(5 * 4 * horizon, Eigen::NoChange);
+  ub_.resize(STATE_DIM * horizon, Eigen::NoChange);
+  lb_.resize(STATE_DIM * horizon, Eigen::NoChange);
   // Set Zero
   a_c_.setZero();
   b_c_.setZero();
@@ -114,7 +116,7 @@ void MpcFormulation::buildQp(double dt)
 
 const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildHessianMat()
 {
-  h_ = 2. * (b_qp_.transpose() * l_ * b_qp_ + alpha_);
+  h_ = /*2. * */ (b_qp_.transpose() * l_ * b_qp_ + alpha_);
   return h_;
 }
 
@@ -137,37 +139,48 @@ const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& stat
 
 const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildConstrainMat(double mu)
 {
-  c_.setZero();
+  a_.setZero();
   double mu_inv = 1.f / mu;
-  Matrix<double, 5, 3> c_block;
-  c_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
+  Matrix<double, 5, 3> a_block;
+  a_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
   for (int i = 0; i < horizon_ * 4; i++)
-    c_.block(i * 5, i * 3, 5, 3) = c_block;
-  return c_;
+    a_.block(i * 5, i * 3, 5, 3) = a_block;
+  return a_;
 }
 
-const VectorXd& MpcFormulation::buildUpperBound(double f_max, const VectorXd& gait_table)
+const VectorXd& MpcFormulation::buildConstrainUpperBound(double f_max, const VectorXd& gait_table)
 {
   for (int i = 0; i < horizon_; ++i)
   {
     for (int j = 0; j < 4; ++j)
     {
       const int row = (i * 4 + j) * 5;
-      const double big_value = 1e10;
-      u_b_(row) = big_value;
-      u_b_(row + 1) = big_value;
-      u_b_(row + 2) = big_value;
-      u_b_(row + 3) = big_value;
-      u_b_(row + 4) = f_max * gait_table(i * 4 + j);
+      ub_a_(row) = BIG_VALUE;
+      ub_a_(row + 1) = BIG_VALUE;
+      ub_a_(row + 2) = BIG_VALUE;
+      ub_a_(row + 3) = BIG_VALUE;
+      ub_a_(row + 4) = f_max * gait_table(i * 4 + j);
     }
   }
-  return u_b_;
+  return ub_a_;
 }
 
-const VectorXd& MpcFormulation::buildLowerBound()
+const VectorXd& MpcFormulation::buildConstrainLowerBound()
 {
-  l_b_.setZero();
-  return l_b_;
+  lb_a_.setZero();
+  return lb_a_;
+}
+
+const VectorXd& MpcFormulation::buildStateUpperBound(const Matrix<double, Dynamic, 1>& final_state)
+{
+  ub_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, BIG_VALUE);
+  return ub_;
+}
+
+const VectorXd& MpcFormulation::buildStateLowerBound(const Matrix<double, Dynamic, 1>& final_state)
+{
+  lb_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, -BIG_VALUE);
+  return lb_;
 }
 
 }  // namespace cheetah_ros

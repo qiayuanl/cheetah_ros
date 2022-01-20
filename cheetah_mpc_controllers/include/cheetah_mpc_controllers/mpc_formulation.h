@@ -24,6 +24,7 @@ class MpcFormulation  // TODO: template for float
 public:
   static constexpr int STATE_DIM = 13;   // 6 dof pose + 6 dof velocity + 1 gravity.
   static constexpr int ACTION_DIM = 12;  // 4 ground reaction force.
+  const double BIG_VALUE = 1e10;
 
   void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha);
 
@@ -33,8 +34,10 @@ public:
   const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& buildHessianMat();
   const VectorXd& buildGVec(double gravity, const RobotState& state, const Matrix<double, Dynamic, 1>& traj);
   const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& buildConstrainMat(double mu);
-  const VectorXd& buildUpperBound(double f_max, const VectorXd& gait_table);
-  const VectorXd& buildLowerBound();
+  const VectorXd& buildConstrainUpperBound(double f_max, const VectorXd& gait_table);
+  const VectorXd& buildConstrainLowerBound();
+  const VectorXd& buildStateUpperBound(const Matrix<double, Dynamic, 1>& final_state);
+  const VectorXd& buildStateLowerBound(const Matrix<double, Dynamic, 1>& final_state);
 
   int horizon_;
 
@@ -42,9 +45,11 @@ public:
   // 1/2 U^{-T} H U + U^{T} g
   Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> h_;  // hessian Matrix
   VectorXd g_;                                           // g vector
-  Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> c_;  // constrain matrix
-  VectorXd u_b_;                                         // upper bound
-  VectorXd l_b_;                                         // lower bound
+  Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> a_;  // constrain matrix
+  VectorXd ub_a_;                                        // upper bound of output
+  VectorXd lb_a_;                                        // lower bound of output
+  VectorXd ub_;                                          // upper bound of state(variable)
+  VectorXd lb_;                                          // lower bound of state(variable)
 
 private:
   // State Space Model

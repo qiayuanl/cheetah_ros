@@ -70,7 +70,7 @@ public:
 
   int getHorizon()
   {
-    return mpc_formulation_.horizon_;
+    return horizon_;
   }
 
   double getDt()
@@ -103,8 +103,12 @@ private:
     mpc_formulation_.buildHessianMat();
     mpc_formulation_.buildGVec(gravity_, state_, traj_);
     mpc_formulation_.buildConstrainMat(mu_);
-    mpc_formulation_.buildUpperBound(f_max_, gait_table_);
-    mpc_formulation_.buildLowerBound();
+    mpc_formulation_.buildConstrainUpperBound(f_max_, gait_table_);
+    mpc_formulation_.buildConstrainLowerBound();
+    ROS_INFO_STREAM(traj_);
+    ROS_INFO_STREAM(getHorizon());
+    mpc_formulation_.buildStateUpperBound(traj_.block<12, 1>(12 * (mpc_formulation_.horizon_ - 1), 0));
+    mpc_formulation_.buildStateLowerBound(traj_.block<12, 1>(12 * (getHorizon() - 1), 0));
   }
 
   ros::Time last_update_;
@@ -136,8 +140,9 @@ protected:
     qp_problem.setOptions(options);
     int n_wsr = 100;
     qpOASES::returnValue rvalue =
-        qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.c_.data(), nullptr,
-                        nullptr, mpc_formulation_.l_b_.data(), mpc_formulation_.u_b_.data(), n_wsr);
+        qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.a_.data(),
+                        mpc_formulation_.lb_.data(), mpc_formulation_.ub_.data(), mpc_formulation_.lb_a_.data(),
+                        mpc_formulation_.ub_a_.data(), n_wsr);
     printFailedInit(rvalue);
 
     if (rvalue != qpOASES::SUCCESSFUL_RETURN)
