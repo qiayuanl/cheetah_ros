@@ -107,16 +107,10 @@
         </visual>
     </gazebo>
 
-    <gazebo reference="base">
-        <material>Gazebo/Green</material>
-        <turnGravityOff>false</turnGravityOff>
-    </gazebo>
-
-    <gazebo reference="trunk">
-        <mu1>0.2</mu1>
-        <mu2>0.2</mu2>
-        <kp value="1000000.0"/>
-        <kd value="1.0"/>
+    <gazebo reference="base_link">
+        <maxVel>100.</maxVel>
+        <kp>10000.</kp>
+        <kd>0.</kd>
     </gazebo>
 
     <gazebo reference="stick_link">
