@@ -14,6 +14,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
     ROS_ERROR("Error occurred while setting up urdf");
     return false;
   }
+  setupJoints(root_nh);
 
   UNITREE_LEGGED_SDK::LowCmd cmd{};
   udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
@@ -77,21 +78,21 @@ bool UnitreeHW::setupJoints(ros::NodeHandle& root_nh)
   for (const auto& joint : urdf_model_->joints_)
   {
     int leg_index, joint_index;
-    if (joint.first.find("FR"))
+    if (joint.first.find("FR") != std::string::npos)
       leg_index = UNITREE_LEGGED_SDK::FR_;
-    else if (joint.first.find("FL"))
+    else if (joint.first.find("FL") != std::string::npos)
       leg_index = UNITREE_LEGGED_SDK::FL_;
-    else if (joint.first.find("RR"))
+    else if (joint.first.find("RR") != std::string::npos)
       leg_index = UNITREE_LEGGED_SDK::RR_;
-    else if (joint.first.find("RL"))
+    else if (joint.first.find("RL") != std::string::npos)
       leg_index = UNITREE_LEGGED_SDK::RL_;
     else
       continue;
-    if (joint.first.find("hip"))
+    if (joint.first.find("hip") != std::string::npos)
       joint_index = 0;
-    else if (joint.first.find("thigh"))
+    else if (joint.first.find("thigh") != std::string::npos)
       joint_index = 1;
-    else if (joint.first.find("calf"))
+    else if (joint.first.find("calf") != std::string::npos)
       joint_index = 2;
     else
       continue;
@@ -104,6 +105,8 @@ bool UnitreeHW::setupJoints(ros::NodeHandle& root_nh)
                                                              &joint_data_[index].vel_des_, &joint_data_[index].kp_,
                                                              &joint_data_[index].kd_, &joint_data_[index].ff_));
   }
+  registerInterface(&joint_state_interface_);
+  registerInterface(&hybrid_joint_interface_);
   return true;
 }
 
