@@ -16,9 +16,9 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
   }
   setupJoints(root_nh);
 
-  UNITREE_LEGGED_SDK::LowCmd cmd{};
   udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
-  udp_->InitCmdData(cmd);
+  udp_->InitCmdData(low_cmd_);
+
   safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(UNITREE_LEGGED_SDK::LeggedType::Aliengo);
 
   // TODO Unitree motor publish
@@ -49,19 +49,18 @@ void UnitreeHW::read(const ros::Time& time, const ros::Duration& period)
 
 void UnitreeHW::write(const ros::Time& time, const ros::Duration& period)
 {
-  UNITREE_LEGGED_SDK::LowCmd cmd{};
   for (int i = 0; i < 20; ++i)
   {
-    cmd.motorCmd[i].q = joint_data_[i].pos_des_;
-    cmd.motorCmd[i].dq = joint_data_[i].vel_des_;
-    cmd.motorCmd[i].Kp = joint_data_[i].kp_;
-    cmd.motorCmd[i].Kd = joint_data_[i].kd_;
-    cmd.motorCmd[i].tau = joint_data_[i].tau_;
+    low_cmd_.motorCmd[i].q = joint_data_[i].pos_des_;
+    low_cmd_.motorCmd[i].dq = joint_data_[i].vel_des_;
+    low_cmd_.motorCmd[i].Kp = joint_data_[i].kp_;
+    low_cmd_.motorCmd[i].Kd = joint_data_[i].kd_;
+    low_cmd_.motorCmd[i].tau = joint_data_[i].ff_;
   }
 
-  safety_->PositionLimit(cmd);
-  //  udp_->SetSend(cmd);
-  //  udp_->Send();
+  safety_->PositionLimit(low_cmd_);
+  udp_->SetSend(low_cmd_);
+  udp_->Send();
 }
 
 bool UnitreeHW::loadUrdf(ros::NodeHandle& root_nh)

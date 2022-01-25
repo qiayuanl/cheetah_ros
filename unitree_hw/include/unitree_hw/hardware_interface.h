@@ -89,6 +89,7 @@ private:
   std::shared_ptr<UNITREE_LEGGED_SDK::UDP> udp_;
   std::shared_ptr<UNITREE_LEGGED_SDK::Safety> safety_;
   UNITREE_LEGGED_SDK::LowState low_state_{};
+  UNITREE_LEGGED_SDK::LowCmd low_cmd_{};
 
   UnitreeMotorData joint_data_[20]{};
 
