@@ -7,7 +7,7 @@ controllers:
   feets_controller:
     type: cheetah_ros/FeetController
     feet:
-      kp_stand: [ 1000., 1000., 1000. ]
-      kd_stand: [ 10., 10., 10. ]
-      kp_swing: [ 700., 700., 150. ]
+      kp_stand: [ 0., 0., 0. ]
+      kd_stand: [ 7., 7., 7. ]
+      kp_swing: [ 500., 500., 500. ]
       kd_swing: [ 7., 7., 7. ]
