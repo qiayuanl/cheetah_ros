@@ -114,7 +114,7 @@ void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
 
   Eigen::Matrix<double, 28, 28> r = Eigen::Matrix<double, 28, 28>::Identity();
   r.block(0, 0, 12, 12) = r_.block(0, 0, 12, 12) * sensor_noise_pimu_rel_foot;
-  r.block(12, t 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
+  r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
   r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * sensor_noise_zfoot;
 
   Vec3<double> g(0, 0, -9.81);
