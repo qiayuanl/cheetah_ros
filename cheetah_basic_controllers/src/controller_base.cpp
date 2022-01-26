@@ -38,7 +38,10 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   state_pub_ =
       std::make_shared<realtime_tools::RealtimePublisher<cheetah_msgs::LegsState>>(controller_nh, "/leg_states", 100);
 
-  linear_estimate_ = std::make_shared<FromTopicStateEstimate>(controller_nh);  // TODO add interface
+  angular_estimate_ = std::make_shared<ImuSensorEstimator>(
+      controller_nh,
+      robot_hw->get<hardware_interface::ImuSensorInterface>()->getHandle("unitree_imu"));  // TODO add interface
+  linear_estimate_ = std::make_shared<LinearKFPosVelEstimator>(controller_nh);             // TODO add interface
   return true;
 }
 

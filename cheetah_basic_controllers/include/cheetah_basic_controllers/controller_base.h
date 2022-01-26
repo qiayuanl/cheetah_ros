@@ -21,7 +21,8 @@
 
 namespace cheetah_ros
 {
-class ControllerBase : public controller_interface::MultiInterfaceController<HybridJointInterface>
+class ControllerBase
+  : public controller_interface::MultiInterfaceController<HybridJointInterface, hardware_interface::ImuSensorInterface>
 {
 public:
   struct LegJoints

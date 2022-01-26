@@ -38,7 +38,7 @@ bool LocomotionBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   traj_.resize(12 * horizon_);
   traj_.setZero();
   for (int i = 0; i < horizon_; ++i)
-    traj_[12 * i + 5] = 0.35;
+    traj_[12 * i + 5] = 0.1;
 
   return true;
 }
