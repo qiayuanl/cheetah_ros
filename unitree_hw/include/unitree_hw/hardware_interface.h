@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <unordered_map>
 
 // ROS
 #include <ros/ros.h>
@@ -17,10 +16,9 @@
 
 // ROS control
 #include <hardware_interface/robot_hw.h>
-#include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
-
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
+#include <hardware_interface/imu_sensor_interface.h>
 
 #include "unitree_legged_sdk/udp.h"
 #include "unitree_legged_sdk/safety.h"
@@ -31,6 +29,16 @@ struct UnitreeMotorData
 {
   double pos_, vel_, tau_;                   // state
   double pos_des_, vel_des_, kp_, kd_, ff_;  // command
+};
+
+struct UnitreeImuData
+{
+  double ori[4];
+  double ori_cov[9];
+  double angular_vel[3];
+  double angular_vel_cov[9];
+  double linear_acc[3];
+  double linear_acc_cov[9];
 };
 
 class UnitreeHW : public hardware_interface::RobotHW
@@ -86,16 +94,20 @@ private:
    */
   bool setupJoints(ros::NodeHandle& root_nh);
 
+  bool setupImu(ros::NodeHandle& root_nh);
+
   std::shared_ptr<UNITREE_LEGGED_SDK::UDP> udp_;
   std::shared_ptr<UNITREE_LEGGED_SDK::Safety> safety_;
   UNITREE_LEGGED_SDK::LowState low_state_{};
   UNITREE_LEGGED_SDK::LowCmd low_cmd_{};
 
   UnitreeMotorData joint_data_[20]{};
+  UnitreeImuData imu_data_{};
 
   // Interface
   hardware_interface::JointStateInterface joint_state_interface_;
   cheetah_ros::HybridJointInterface hybrid_joint_interface_;
+  hardware_interface::ImuSensorInterface imu_sensor_interface_;
 
   // URDF model of the robot
   std::string urdf_string_;                  // for transmission

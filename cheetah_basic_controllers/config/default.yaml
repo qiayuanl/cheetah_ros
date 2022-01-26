@@ -2,6 +2,9 @@ controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
     publish_rate: 100
+  imu_sensor_controller:
+    type: imu_sensor_controller/ImuSensorController
+    publish_rate: 100
   base_controller:
     type: cheetah_ros/ControllerBase
   feets_controller:

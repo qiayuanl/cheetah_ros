@@ -15,6 +15,7 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
     return false;
   }
   setupJoints(root_nh);
+  setupImu(root_nh);
 
   udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
   udp_->InitCmdData(low_cmd_);
@@ -37,6 +38,18 @@ void UnitreeHW::read(const ros::Time& time, const ros::Duration& period)
     joint_data_[i].vel_ = low_state.motorState[i].dq;
     joint_data_[i].tau_ = low_state.motorState[i].tauEst;
   }
+
+  imu_data_.ori[0] = low_state.imu.quaternion[1];
+  imu_data_.ori[1] = low_state.imu.quaternion[2];
+  imu_data_.ori[2] = low_state.imu.quaternion[3];
+  imu_data_.ori[3] = low_state.imu.quaternion[0];
+  imu_data_.angular_vel[0] = low_state.imu.gyroscope[0];
+  imu_data_.angular_vel[1] = low_state.imu.gyroscope[1];
+  imu_data_.angular_vel[2] = low_state.imu.gyroscope[2];
+  imu_data_.linear_acc[0] = low_state.imu.accelerometer[0];
+  imu_data_.linear_acc[1] = low_state.imu.accelerometer[1];
+  imu_data_.linear_acc[2] = low_state.imu.accelerometer[2];
+
   // Set feedforward and velocity cmd to zero to avoid for saft when not controller setCommand
   std::vector<std::string> names = hybrid_joint_interface_.getNames();
   for (const auto& name : names)
@@ -106,6 +119,15 @@ bool UnitreeHW::setupJoints(ros::NodeHandle& root_nh)
   }
   registerInterface(&joint_state_interface_);
   registerInterface(&hybrid_joint_interface_);
+  return true;
+}
+
+bool UnitreeHW::setupImu(ros::NodeHandle& root_nh)
+{
+  imu_sensor_interface_.registerHandle(hardware_interface::ImuSensorHandle(
+      "unitree_imu", "unitree_imu", imu_data_.ori, imu_data_.ori_cov, imu_data_.angular_vel, imu_data_.angular_vel_cov,
+      imu_data_.linear_acc, imu_data_.linear_acc_cov));
+  registerInterface(&imu_sensor_interface_);
   return true;
 }
 
