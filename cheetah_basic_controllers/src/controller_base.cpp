@@ -38,7 +38,7 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   state_pub_ =
       std::make_shared<realtime_tools::RealtimePublisher<cheetah_msgs::LegsState>>(controller_nh, "/leg_states", 100);
 
-  state_estimate_ = std::make_shared<FromTopicStateEstimate>(controller_nh);  // TODO add interface
+  linear_estimate_ = std::make_shared<FromTopicStateEstimate>(controller_nh);  // TODO add interface
   return true;
 }
 
@@ -62,32 +62,14 @@ void ControllerBase::stopping(const ros::Time& /*time*/)
 
 void ControllerBase::updateData(const ros::Time& time, const ros::Duration& period)
 {
-  if (state_estimate_ != nullptr)
-    state_estimate_->update(robot_state_);
-
-  Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
-  for (int leg = 0; leg < 4; ++leg)
-    for (int joint = 0; joint < 3; ++joint)
-    {
-      // Free-flyer joints have 6 degrees of freedom, but are represented by 7 scalars: the position of the basis center
-      // in the world frame, and the orientation of the basis in the world frame stored as a quaternion.
-      q(7 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getPosition();
-      v(6 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getVelocity();
-    }
-  q.head(7) << robot_state_.pos_, robot_state_.quat_.coeffs();
-  v.head(6) << robot_state_.linear_vel_, robot_state_.angular_vel_;
-
-  pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
-  pinocchio::computeJointJacobians(*pin_model_, *pin_data_);
-  pinocchio::updateFramePlacements(*pin_model_, *pin_data_);
-  for (int leg = 0; leg < 4; ++leg)
+  if (angular_estimate_ != nullptr)
   {
-    pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
-    robot_state_.foot_pos_[leg] = pin_data_->oMf[frame_id].translation();
-    robot_state_.foot_vel_[leg] =
-        pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED)
-            .linear();
+    angular_estimate_->update(robot_state_);
+    pinocchioKine();
   }
+  if (linear_estimate_ != nullptr)
+    linear_estimate_->update(robot_state_);
+  pinocchioKine();
 }
 
 void ControllerBase::updateCommand(const ros::Time& time, const ros::Duration& period)
@@ -125,6 +107,33 @@ void ControllerBase::updateCommand(const ros::Time& time, const ros::Duration& p
     Eigen::Matrix<double, 18, 1> tau = jac.transpose() * wrench;
     for (int joint = 0; joint < 3; ++joint)
       leg_joints_[leg].joints_[joint].setFeedforward(tau(6 + leg * 3 + joint));
+  }
+}
+
+void ControllerBase::pinocchioKine()
+{
+  Eigen::VectorXd q(pin_model_->nq), v(pin_model_->nv);
+  for (int leg = 0; leg < 4; ++leg)
+    for (int joint = 0; joint < 3; ++joint)
+    {
+      // Free-flyer joints have 6 degrees of freedom, but are represented by 7 scalars: the position of the basis center
+      // in the world frame, and the orientation of the basis in the world frame stored as a quaternion.
+      q(7 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getPosition();
+      v(6 + leg * 3 + joint) = leg_joints_[leg].joints_[joint].getVelocity();
+    }
+  q.head(7) << robot_state_.pos_, robot_state_.quat_.coeffs();
+  v.head(6) << robot_state_.linear_vel_, robot_state_.angular_vel_;
+
+  pinocchio::forwardKinematics(*pin_model_, *pin_data_, q, v);
+  pinocchio::computeJointJacobians(*pin_model_, *pin_data_);
+  pinocchio::updateFramePlacements(*pin_model_, *pin_data_);
+  for (int leg = 0; leg < 4; ++leg)
+  {
+    pinocchio::FrameIndex frame_id = pin_model_->getFrameId(LEG_PREFIX[leg] + "_foot");
+    robot_state_.foot_pos_[leg] = pin_data_->oMf[frame_id].translation();
+    robot_state_.foot_vel_[leg] =
+        pinocchio::getFrameVelocity(*pin_model_, *pin_data_, frame_id, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED)
+            .linear();
   }
 }
 

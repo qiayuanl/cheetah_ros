@@ -46,10 +46,11 @@ public:
   void setLegCmd(LegPrefix leg, const LegCmd& cmd);
 
 protected:
+  void pinocchioKine();
   void publishState(const ros::Time& time, const ros::Duration& period);
 
   RobotState robot_state_;
-  std::shared_ptr<StateEstimateBase> state_estimate_;
+  std::shared_ptr<StateEstimateBase> angular_estimate_, linear_estimate_;
 
   std::shared_ptr<urdf::ModelInterface> urdf_;
   std::shared_ptr<pinocchio::Model> pin_model_;
