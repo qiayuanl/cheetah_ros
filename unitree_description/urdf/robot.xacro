@@ -7,6 +7,7 @@
     <xacro:include filename="$(find unitree_description)/urdf/common/materials.xacro"/>
     <xacro:include filename="$(find unitree_description)/urdf/common/leg.xacro"/>
     <xacro:include filename="$(find unitree_description)/urdf/common/gazebo.xacro"/>
+    <xacro:include filename="$(find unitree_description)/urdf/common/imu.xacro"/>
 
     <xacro:include filename="$(find unitree_description)/urdf/$(arg robot_type)/const.xacro"/>
 
@@ -42,32 +43,7 @@
         </inertial>
     </link>
 
-    <joint name="unitree_imu_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="unitree_imu"/>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-    </joint>
-
-    <link name="unitree_imu">
-        <inertial>
-            <mass value="0.001"/>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
-        </inertial>
-        <visual>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <box size="0.001 0.001 0.001"/>
-            </geometry>
-            <material name="red"/>
-        </visual>
-        <collision>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <box size=".001 .001 .001"/>
-            </geometry>
-        </collision>
-    </link>
+    <xacro:IMU connected_to="base_link" imu_name="unitree_imu" xyz="0. 0. 0." rpy="0. 0. 0."/>
 
     <xacro:leg prefix="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
         <origin rpy="0 0 0" xyz="${leg_offset_x} ${-leg_offset_y} 0"/>

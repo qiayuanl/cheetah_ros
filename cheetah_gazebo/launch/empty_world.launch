@@ -3,6 +3,8 @@
     <arg name="hung_up" default="false"/>
     <arg name="paused" default="false"/>
 
+    <rosparam file="$(find cheetah_gazebo)/config/imus.yaml" command="load"/>
+
     <param name="robot_description" command="$(find xacro)/xacro $(find unitree_description)/urdf/robot.xacro
        robot_type:=$(arg robot_type) hung_up:=$(arg hung_up)
     "/>
