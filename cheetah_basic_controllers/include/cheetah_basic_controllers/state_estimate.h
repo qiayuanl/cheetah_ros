@@ -5,6 +5,7 @@
 #pragma once
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <realtime_tools/realtime_publisher.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <hardware_interface/imu_sensor_interface.h>
 
@@ -15,11 +16,13 @@ namespace cheetah_ros
 class StateEstimateBase
 {
 public:
-  StateEstimateBase(ros::NodeHandle& nh)
-  {
-  }
+  StateEstimateBase(ros::NodeHandle& nh);
   virtual ~StateEstimateBase(){};
-  virtual void update(RobotState& state){};
+  virtual void update(ros::Time time, RobotState& state);
+
+private:
+  std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry>> odom_pub_;
+  ros::Time last_publish_;
 };
 
 class FromTopicStateEstimate : public StateEstimateBase
@@ -28,7 +31,7 @@ public:
   FromTopicStateEstimate(ros::NodeHandle& nh);
   ~FromTopicStateEstimate() override{};
 
-  void update(RobotState& state) override;
+  void update(ros::Time time, RobotState& state) override;
 
 private:
   void callback(const nav_msgs::Odometry::ConstPtr& msg);
@@ -41,7 +44,7 @@ class LinearKFPosVelEstimator : public StateEstimateBase
 {
 public:
   LinearKFPosVelEstimator(ros::NodeHandle& nh);
-  void update(RobotState& state) override;
+  void update(ros::Time time, RobotState& state) override;
 
 private:
   Eigen::Matrix<double, 18, 1> x_hat_;
@@ -60,7 +63,7 @@ class ImuSensorEstimator : public StateEstimateBase
 public:
   using StateEstimateBase::StateEstimateBase;
   ImuSensorEstimator(ros::NodeHandle& nh, hardware_interface::ImuSensorHandle imu);
-  void update(RobotState& state) override;
+  void update(ros::Time time, RobotState& state) override;
 
 private:
   hardware_interface::ImuSensorHandle imu_;

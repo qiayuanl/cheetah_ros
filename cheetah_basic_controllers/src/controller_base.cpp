@@ -67,11 +67,11 @@ void ControllerBase::updateData(const ros::Time& time, const ros::Duration& peri
 {
   if (angular_estimate_ != nullptr)
   {
-    angular_estimate_->update(robot_state_);
+    angular_estimate_->update(time, robot_state_);
     pinocchioKine();
   }
   if (linear_estimate_ != nullptr)
-    linear_estimate_->update(robot_state_);
+    linear_estimate_->update(time, robot_state_);
   pinocchioKine();
 }
 

@@ -5,6 +5,39 @@
 
 namespace cheetah_ros
 {
+StateEstimateBase::StateEstimateBase(ros::NodeHandle& nh)
+{
+  odom_pub_ = std::make_shared<realtime_tools::RealtimePublisher<nav_msgs::Odometry>>(nh, "/odom", 100);
+}
+
+void StateEstimateBase::update(ros::Time time, RobotState& state)
+{
+  if (time < ros::Time(0.01))  // When simulate time reset
+    last_publish_ = time;
+  if (time - last_publish_ > ros::Duration(0.01))  // 100Hz
+  {
+    last_publish_ = time;
+    if (odom_pub_->trylock())
+    {
+      odom_pub_->msg_.header.stamp = time;
+      odom_pub_->msg_.pose.pose.orientation.x = state.quat_.x();
+      odom_pub_->msg_.pose.pose.orientation.y = state.quat_.y();
+      odom_pub_->msg_.pose.pose.orientation.z = state.quat_.z();
+      odom_pub_->msg_.pose.pose.orientation.w = state.quat_.w();
+      odom_pub_->msg_.pose.pose.position.x = state.pos_[0];
+      odom_pub_->msg_.pose.pose.position.y = state.pos_[1];
+      odom_pub_->msg_.pose.pose.position.z = state.pos_[2];
+      odom_pub_->msg_.twist.twist.angular.x = state.angular_vel_[0];
+      odom_pub_->msg_.twist.twist.angular.y = state.angular_vel_[1];
+      odom_pub_->msg_.twist.twist.angular.z = state.angular_vel_[2];
+      odom_pub_->msg_.twist.twist.linear.x = state.linear_vel_[0];
+      odom_pub_->msg_.twist.twist.linear.y = state.linear_vel_[1];
+      odom_pub_->msg_.twist.twist.linear.z = state.linear_vel_[2];
+      odom_pub_->unlockAndPublish();
+    }
+  }
+}
+
 FromTopicStateEstimate::FromTopicStateEstimate(ros::NodeHandle& nh) : StateEstimateBase(nh)
 {
   sub_ = nh.subscribe<nav_msgs::Odometry>("/ground_truth/state", 100, &FromTopicStateEstimate::callback, this);
@@ -15,7 +48,7 @@ void FromTopicStateEstimate::callback(const nav_msgs::Odometry::ConstPtr& msg)
   buffer_.writeFromNonRT(*msg);
 }
 
-void FromTopicStateEstimate::update(RobotState& state)
+void FromTopicStateEstimate::update(ros::Time time, RobotState& state)
 {
   nav_msgs::Odometry odom = *buffer_.readFromRT();
   state.pos_ << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
@@ -66,7 +99,7 @@ LinearKFPosVelEstimator::LinearKFPosVelEstimator(ros::NodeHandle& nh) : StateEst
   r_.setIdentity();
 }
 
-void LinearKFPosVelEstimator::update(RobotState& state)
+void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
 {
   double process_noise_pimu = 0.02;
   double process_noise_vimu = 0.02;
@@ -81,7 +114,7 @@ void LinearKFPosVelEstimator::update(RobotState& state)
 
   Eigen::Matrix<double, 28, 28> r = Eigen::Matrix<double, 28, 28>::Identity();
   r.block(0, 0, 12, 12) = r_.block(0, 0, 12, 12) * sensor_noise_pimu_rel_foot;
-  r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
+  r.block(12, t 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
   r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * sensor_noise_zfoot;
 
   Vec3<double> g(0, 0, -9.81);
@@ -123,6 +156,8 @@ void LinearKFPosVelEstimator::update(RobotState& state)
 
   state.pos_ = x_hat_.block(0, 0, 3, 1);
   state.linear_vel_ = x_hat_.block(3, 0, 3, 1);
+
+  StateEstimateBase::update(time, state);
 }
 
 ImuSensorEstimator::ImuSensorEstimator(ros::NodeHandle& nh, hardware_interface::ImuSensorHandle imu)
@@ -130,7 +165,7 @@ ImuSensorEstimator::ImuSensorEstimator(ros::NodeHandle& nh, hardware_interface::
 {
 }
 
-void ImuSensorEstimator::update(RobotState& state)
+void ImuSensorEstimator::update(ros::Time time, RobotState& state)
 {
   state.quat_.coeffs() << imu_.getOrientation()[0], imu_.getOrientation()[1], imu_.getOrientation()[2],
       imu_.getOrientation()[3];
