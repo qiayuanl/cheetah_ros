@@ -85,7 +85,6 @@ void LinearKFPosVelEstimator::update(RobotState& state)
   r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * sensor_noise_zfoot;
 
   Vec3<double> g(0, 0, -9.81);
-  //  Vec3<double> g(0, 0, 0);
   Vec3<double> accel = quaternionToRotationMatrix(state.quat_) * state.accel_ + g;
   Vec4<double> pzs = Vec4<double>::Zero();
 
