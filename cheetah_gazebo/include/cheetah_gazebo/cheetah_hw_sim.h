@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include <deque>
+
 #include <gazebo_ros_control/default_robot_hw_sim.h>
 #include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -48,6 +50,12 @@ namespace cheetah_ros
 struct HybridJointData
 {
   hardware_interface::JointHandle joint_;
+  double pos_des_, vel_des_, kp_, kd_, ff_;
+};
+
+struct HybridJointCommand
+{
+  ros::Time stamp_;
   double pos_des_, vel_des_, kp_, kd_, ff_;
 };
 
@@ -78,6 +86,8 @@ private:
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
   std::list<HybridJointData> hybrid_joint_datas_;
   std::list<ImuData> imu_datas_;
+  std::unordered_map<std::string, std::deque<HybridJointCommand> > cmd_buffer_;
+  double delay_;
 };
 
 }  // namespace cheetah_ros

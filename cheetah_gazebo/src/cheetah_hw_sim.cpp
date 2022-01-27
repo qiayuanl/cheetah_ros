@@ -54,15 +54,19 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
     HybridJointData& back = hybrid_joint_datas_.back();
     hybrid_joint_interface_.registerHandle(
         HybridJointHandle(back.joint_, &back.pos_des_, &back.vel_des_, &back.kp_, &back.kd_, &back.ff_));
+    cmd_buffer_.insert(
+        std::make_pair<std::string, std::deque<HybridJointCommand>>(name.c_str(), std::deque<HybridJointCommand>()));
   }
 
   // IMU interface
   gazebo_ros_control::DefaultRobotHWSim::registerInterface(&imu_sensor_interface_);
   XmlRpc::XmlRpcValue xml_rpc_value;
-  if (!model_nh.getParam("imus", xml_rpc_value))
+  if (!model_nh.getParam("gazebo/imus", xml_rpc_value))
     ROS_WARN("No imu specified");
   else
     parseImu(xml_rpc_value, parent_model);
+  if (!model_nh.getParam("gazebo/delay", delay_))
+    delay_ = 0.;
   return ret;
 }
 
@@ -100,8 +104,19 @@ void CheetahHWSim::writeSim(ros::Time time, ros::Duration period)
 {
   for (auto joint : hybrid_joint_datas_)
   {
-    joint.joint_.setCommand(joint.kp_ * (joint.pos_des_ - joint.joint_.getPosition()) +
-                            joint.kd_ * (joint.vel_des_ - joint.joint_.getVelocity()) + joint.ff_);
+    auto& buffer = cmd_buffer_.find(joint.joint_.getName())->second;
+    buffer.push_front(HybridJointCommand{ .stamp_ = time,
+                                          .pos_des_ = joint.pos_des_,
+                                          .vel_des_ = joint.vel_des_,
+                                          .kp_ = joint.kp_,
+                                          .kd_ = joint.kd_,
+                                          .ff_ = joint.ff_ });
+
+    while (!buffer.empty() && buffer.back().stamp_ + ros::Duration(delay_) < time)
+      buffer.pop_back();
+    const auto& cmd = buffer.back();
+    joint.joint_.setCommand(cmd.kp_ * (cmd.pos_des_ - joint.joint_.getPosition()) +
+                            cmd.kd_ * (cmd.vel_des_ - joint.joint_.getVelocity()) + cmd.ff_);
   }
   DefaultRobotHWSim::writeSim(time, period);
 }
