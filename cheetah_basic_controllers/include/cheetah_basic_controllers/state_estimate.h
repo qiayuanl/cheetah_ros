@@ -8,6 +8,7 @@
 #include <realtime_tools/realtime_publisher.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <hardware_interface/imu_sensor_interface.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include "cpp_types.h"
 
@@ -23,6 +24,7 @@ public:
 private:
   std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry>> odom_pub_;
   ros::Time last_publish_;
+  tf2_ros::TransformBroadcaster tf_br_;
 };
 
 class FromTopicStateEstimate : public StateEstimateBase

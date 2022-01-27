@@ -20,6 +20,7 @@ find_package(catkin REQUIRED
         cheetah_common
         cheetah_msgs
         dynamic_reconfigure
+        tf2_ros
         )
 
 #find_package(Boost REQUIRED COMPONENTS
@@ -48,8 +49,7 @@ catkin_package(
         cheetah_common
         cheetah_msgs
         dynamic_reconfigure
-        DEPENDS
-        #        Boost
+        tf2_ros
 )
 
 ###########

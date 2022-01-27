@@ -35,6 +35,18 @@ void StateEstimateBase::update(ros::Time time, RobotState& state)
       odom_pub_->msg_.twist.twist.linear.z = state.linear_vel_[2];
       odom_pub_->unlockAndPublish();
     }
+    geometry_msgs::TransformStamped transform_stamped;
+    transform_stamped.header.stamp = time;
+    transform_stamped.header.frame_id = "odom";
+    transform_stamped.child_frame_id = "base_link";
+    transform_stamped.transform.translation.x = state.pos_[0];
+    transform_stamped.transform.translation.y = state.pos_[1];
+    transform_stamped.transform.translation.z = state.pos_[2];
+    transform_stamped.transform.rotation.x = state.quat_.x();
+    transform_stamped.transform.rotation.y = state.quat_.y();
+    transform_stamped.transform.rotation.z = state.quat_.z();
+    transform_stamped.transform.rotation.w = state.quat_.w();
+    tf_br_.sendTransform(transform_stamped);
   }
 }
 
@@ -56,6 +68,7 @@ void FromTopicStateEstimate::update(ros::Time time, RobotState& state)
       odom.pose.pose.orientation.w;
   state.linear_vel_ << odom.twist.twist.linear.x, odom.twist.twist.linear.y, odom.twist.twist.linear.z;
   state.angular_vel_ << odom.twist.twist.angular.x, odom.twist.twist.angular.y, odom.twist.twist.angular.z;
+  StateEstimateBase::update(time, state);
 }
 
 LinearKFPosVelEstimator::LinearKFPosVelEstimator(ros::NodeHandle& nh) : StateEstimateBase(nh)
