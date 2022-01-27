@@ -72,6 +72,8 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
 
 void CheetahHWSim::readSim(ros::Time time, ros::Duration period)
 {
+  ROS_INFO_STREAM(delay_);
+
   gazebo_ros_control::DefaultRobotHWSim::readSim(time, period);
   for (auto& imu : imu_datas_)
   {
