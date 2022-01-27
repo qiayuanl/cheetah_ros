@@ -169,6 +169,9 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
         state_pub_->msg_.foot_vel[leg].x = robot_state_.foot_vel_[leg].x();
         state_pub_->msg_.foot_vel[leg].y = robot_state_.foot_vel_[leg].y();
         state_pub_->msg_.foot_vel[leg].z = robot_state_.foot_vel_[leg].z();
+        state_pub_->msg_.foot_force[leg].x = leg_cmd_[leg].ff_cartesian_[0];
+        state_pub_->msg_.foot_force[leg].y = leg_cmd_[leg].ff_cartesian_[1];
+        state_pub_->msg_.foot_force[leg].z = leg_cmd_[leg].ff_cartesian_[2];
       }
       state_pub_->unlockAndPublish();
     }
