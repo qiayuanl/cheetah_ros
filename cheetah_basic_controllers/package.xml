@@ -19,6 +19,7 @@
     <depend>cheetah_msgs</depend>
     <depend>pinocchio</depend>
     <depend>dynamic_reconfigure</depend>
+    <depend>tf2_ros</depend>
 
     <exec_depend>controller_manager</exec_depend>
 
