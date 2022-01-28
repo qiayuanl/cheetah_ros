@@ -133,7 +133,7 @@ const VectorXd& MpcFormulation::buildGVec(double gravity, const RobotState& stat
     for (int j = 0; j < STATE_DIM - 1; j++)
       x_ref(STATE_DIM * i + j, 0) = traj[12 * i + j];
 
-  g_ = 2. * b_qp_.transpose() * l_ * (a_qp_ * x_0 - x_ref);
+  g_ = /*2. * */ b_qp_.transpose() * l_ * (a_qp_ * x_0 - x_ref);
   return g_;
 }
 
