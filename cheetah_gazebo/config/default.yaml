@@ -1,5 +1,5 @@
 gazebo:
-  delay: 0.01
+  delay: 0.005
   imus:
     unitree_imu:
       frame_id: unitree_imu
