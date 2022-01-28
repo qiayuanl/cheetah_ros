@@ -27,8 +27,6 @@ catkin_package(
         roslint
         hardware_interface
         DEPENDS
-        LIBRARIES
-        ${PROJECT_NAME}
 )
 
 include_directories(

@@ -18,8 +18,6 @@ find_package(catkin REQUIRED
         cheetah_msgs
         hardware_interface
         controller_interface
-        transmission_interface
-        joint_limits_interface
         controller_manager
         urdf
         realtime_tools
@@ -47,8 +45,6 @@ catkin_package(
         cheetah_msgs
         hardware_interface
         controller_interface
-        transmission_interface
-        joint_limits_interface
         controller_manager
         urdf
         realtime_tools
