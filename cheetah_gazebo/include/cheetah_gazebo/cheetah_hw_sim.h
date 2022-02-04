@@ -40,6 +40,7 @@
 #include <deque>
 
 #include <gazebo_ros_control/default_robot_hw_sim.h>
+#include <gazebo/sensors/sensors.hh>
 #include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 
@@ -88,6 +89,7 @@ private:
   std::list<ImuData> imu_datas_;
   std::unordered_map<std::string, std::deque<HybridJointCommand> > cmd_buffer_;
   double delay_;
+  gazebo::sensors::ContactSensorPtr contact_sensor_;
 };
 
 }  // namespace cheetah_ros

@@ -18,6 +18,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/hardware_interface/contact_sensor_interface.h>
 #include <hardware_interface/imu_sensor_interface.h>
 
 #include "unitree_legged_sdk/udp.h"
@@ -89,12 +90,13 @@ private:
    *
    * Set up transmission
    *
-   * @param root_nh Root node-handle of a ROS node.
    * @return True if successful.
    */
-  bool setupJoints(ros::NodeHandle& root_nh);
+  bool setupJoints();
 
-  bool setupImu(ros::NodeHandle& root_nh);
+  bool setupImu();
+
+  bool setupContactSensor(ros::NodeHandle& nh);
 
   std::shared_ptr<UNITREE_LEGGED_SDK::UDP> udp_;
   std::shared_ptr<UNITREE_LEGGED_SDK::Safety> safety_;
@@ -103,11 +105,14 @@ private:
 
   UnitreeMotorData joint_data_[20]{};
   UnitreeImuData imu_data_{};
+  bool contact_state_[4]{};
+  int contact_threshold_[4]{};
 
   // Interface
   hardware_interface::JointStateInterface joint_state_interface_;
-  cheetah_ros::HybridJointInterface hybrid_joint_interface_;
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
+  cheetah_ros::HybridJointInterface hybrid_joint_interface_;
+  cheetah_ros::ContactSensorInterface contact_sensor_interface_;
 
   // URDF model of the robot
   std::string urdf_string_;                  // for transmission

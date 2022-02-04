@@ -14,8 +14,9 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
     ROS_ERROR("Error occurred while setting up urdf");
     return false;
   }
-  setupJoints(root_nh);
-  setupImu(root_nh);
+  setupJoints();
+  setupImu();
+  setupContactSensor(robot_hw_nh);
 
   udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
   udp_->InitCmdData(low_cmd_);
@@ -49,6 +50,16 @@ void UnitreeHW::read(const ros::Time& time, const ros::Duration& period)
   imu_data_.linear_acc[0] = low_state.imu.accelerometer[0];
   imu_data_.linear_acc[1] = low_state.imu.accelerometer[1];
   imu_data_.linear_acc[2] = low_state.imu.accelerometer[2];
+
+  for (int i = 0; i < 4; ++i)
+  {
+    contact_state_[i] = low_state.footForce[i] > contact_threshold_[i];
+    if (contact_state_[i])
+      ROS_ERROR_STREAM("Contact: " << i);
+  }
+
+  //  ROS_ERROR_STREAM("Force: " << low_state.footForce[0] << ", " << low_state.footForce[1] << ", "
+  //                             << low_state.footForce[2] << ", " << low_state.footForce[3]);
 
   // Set feedforward and velocity cmd to zero to avoid for saft when not controller setCommand
   std::vector<std::string> names = hybrid_joint_interface_.getNames();
@@ -85,7 +96,7 @@ bool UnitreeHW::loadUrdf(ros::NodeHandle& root_nh)
   return !urdf_string_.empty() && urdf_model_->initString(urdf_string_);
 }
 
-bool UnitreeHW::setupJoints(ros::NodeHandle& root_nh)
+bool UnitreeHW::setupJoints()
 {
   for (const auto& joint : urdf_model_->joints_)
   {
@@ -122,12 +133,25 @@ bool UnitreeHW::setupJoints(ros::NodeHandle& root_nh)
   return true;
 }
 
-bool UnitreeHW::setupImu(ros::NodeHandle& root_nh)
+bool UnitreeHW::setupImu()
 {
   imu_sensor_interface_.registerHandle(hardware_interface::ImuSensorHandle(
       "unitree_imu", "unitree_imu", imu_data_.ori, imu_data_.ori_cov, imu_data_.angular_vel, imu_data_.angular_vel_cov,
       imu_data_.linear_acc, imu_data_.linear_acc_cov));
   registerInterface(&imu_sensor_interface_);
+  return true;
+}
+
+bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh)
+{
+  XmlRpc::XmlRpcValue contact_threshold;
+  if (nh.getParam("contact_threshold", contact_threshold))
+    if (contact_threshold.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      if (contact_threshold.size() == 4)
+        for (int i = 0; i < 4; ++i)
+          contact_threshold_[i] = contact_threshold[i];
+  contact_sensor_interface_.registerHandle(cheetah_ros::ContactSensorHandle("foot", contact_state_));
+  registerInterface(&contact_sensor_interface_);
   return true;
 }
 
