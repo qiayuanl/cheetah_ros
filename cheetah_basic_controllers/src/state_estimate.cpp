@@ -130,16 +130,32 @@ void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
   r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
   r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * sensor_noise_zfoot;
 
-  Vec3<double> g(0, 0, -9.81);
-  Vec3<double> accel = quaternionToRotationMatrix(state.quat_) * state.accel_ + g;
-  Vec4<double> pzs = Vec4<double>::Zero();
+  int qindex;
+  int rindex2;
+  int rindex3;
 
   for (int i = 0; i < 4; i++)
   {
+    int i1 = 3 * i;
+
+    qindex = 6 + i1;
+    rindex2 = 12 + i1;
+    rindex3 = 24 + i;
+
+    double high_suspect_number(100);
+    q.block(qindex, qindex, 3, 3) =
+        (state.contact_state_[i] ? 1. : high_suspect_number) * q.block(qindex, qindex, 3, 3);
+    r.block(rindex2, rindex2, 3, 3) =
+        (state.contact_state_[i] ? 1. : high_suspect_number) * r.block(rindex2, rindex2, 3, 3);
+    r(rindex3, rindex3) = (state.contact_state_[i] ? 1. : high_suspect_number) * r(rindex3, rindex3);
+
     ps_.segment(3 * i, 3) = state.pos_ - state.foot_pos_[i];
     vs_.segment(3 * i, 3) = -state.foot_vel_[i];
-    pzs(i) = 0.;
   }
+
+  Vec3<double> g(0, 0, -9.81);
+  Vec3<double> accel = quaternionToRotationMatrix(state.quat_) * state.accel_ + g;
+  Vec4<double> pzs = Vec4<double>::Zero();
 
   Eigen::Matrix<double, 28, 1> y;
   y << ps_, vs_, pzs;
