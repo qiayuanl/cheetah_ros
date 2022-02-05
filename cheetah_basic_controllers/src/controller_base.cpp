@@ -31,6 +31,7 @@ bool ControllerBase::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle
   for (int leg = 0; leg < 4; ++leg)
     for (int j = 0; j < 3; ++j)
       leg_joints_[leg].joints_[j] = hybrid_joint_interface->getHandle(pin_model_->names[2 + leg * 3 + j]);
+  feet_contact_ = robot_hw->get<ContactSensorInterface>()->getHandle("feet");
 
   // ROS Topic
   legs_cmd_sub_ =
@@ -65,6 +66,9 @@ void ControllerBase::stopping(const ros::Time& /*time*/)
 
 void ControllerBase::updateData(const ros::Time& time, const ros::Duration& period)
 {
+  for (int i = 0; i < 4; ++i)
+    robot_state_.contact_state_[i] = feet_contact_.getIsContact()[i];
+
   if (angular_estimate_ != nullptr)
   {
     angular_estimate_->update(time, robot_state_);

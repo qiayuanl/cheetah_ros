@@ -112,8 +112,8 @@ private:
   // Interface
   hardware_interface::JointStateInterface joint_state_interface_;
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
-  cheetah_ros::HybridJointInterface hybrid_joint_interface_;
-  cheetah_ros::ContactSensorInterface contact_sensor_interface_;
+  HybridJointInterface hybrid_joint_interface_;
+  ContactSensorInterface contact_sensor_interface_;
 
   // URDF model of the robot
   std::string urdf_string_;                  // for transmission

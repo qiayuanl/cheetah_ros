@@ -146,8 +146,7 @@ bool UnitreeHW::setupImu()
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh)
 {
   nh.getParam("contact_threshold", contact_threshold_);
-
-  contact_sensor_interface_.registerHandle(cheetah_ros::ContactSensorHandle("feet", contact_state_));
+  contact_sensor_interface_.registerHandle(ContactSensorHandle("feet", contact_state_));
   registerInterface(&contact_sensor_interface_);
   return true;
 }

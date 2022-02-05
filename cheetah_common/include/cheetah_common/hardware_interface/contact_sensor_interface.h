@@ -12,7 +12,7 @@ class ContactSensorHandle
 public:
   ContactSensorHandle() = default;
 
-  ContactSensorHandle(const std::string& name, const bool* is_contact) : is_contact_(is_contact)
+  ContactSensorHandle(const std::string& name, const bool* is_contact) : name_(name), is_contact_(is_contact)
   {
     if (!is_contact)
     {
@@ -26,10 +26,10 @@ public:
     return name_;
   }
 
-  bool getIsContact()
+  const bool* getIsContact()
   {
     assert(is_contact_);
-    return *is_contact_;
+    return is_contact_;
   }
 
 private:

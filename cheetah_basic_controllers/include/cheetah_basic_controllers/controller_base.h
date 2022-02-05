@@ -10,6 +10,7 @@
 
 #include <controller_interface/multi_interface_controller.h>
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/hardware_interface/contact_sensor_interface.h>
 #include <cheetah_common/cpp_types.h>
 
 #include <cheetah_msgs/LegsCmd.h>
@@ -22,7 +23,8 @@
 namespace cheetah_ros
 {
 class ControllerBase
-  : public controller_interface::MultiInterfaceController<HybridJointInterface, hardware_interface::ImuSensorInterface>
+  : public controller_interface::MultiInterfaceController<HybridJointInterface, hardware_interface::ImuSensorInterface,
+                                                          ContactSensorInterface>
 {
 public:
   struct LegJoints
@@ -62,6 +64,7 @@ private:
 
   LegJoints leg_joints_[4];
   LegCmd leg_cmd_[4];
+  ContactSensorHandle feet_contact_;
 
   ros::Subscriber legs_cmd_sub_;
   realtime_tools::RealtimeBuffer<cheetah_msgs::LegsCmd> legs_cmd_buffer_;
