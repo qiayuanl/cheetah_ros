@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include <cheetah_basic_controllers/cpp_types.h>
+#include <cheetah_common/cpp_types.h>
 
 #include <Eigen/Dense>
 #include <Eigen/Core>

@@ -10,13 +10,13 @@
 
 #include <controller_interface/multi_interface_controller.h>
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/cpp_types.h>
 
 #include <cheetah_msgs/LegsCmd.h>
 #include <cheetah_msgs/LegsState.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
 
-#include "cpp_types.h"
 #include "state_estimate.h"
 
 namespace cheetah_ros

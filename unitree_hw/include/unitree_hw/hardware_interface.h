@@ -19,6 +19,7 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
 #include <cheetah_common/hardware_interface/contact_sensor_interface.h>
+#include <cheetah_common/cpp_types.h>
 #include <hardware_interface/imu_sensor_interface.h>
 
 #include "unitree_legged_sdk/udp.h"
@@ -106,7 +107,7 @@ private:
   UnitreeMotorData joint_data_[20]{};
   UnitreeImuData imu_data_{};
   bool contact_state_[4]{};
-  int contact_threshold_[4]{};
+  int contact_threshold_{};
 
   // Interface
   hardware_interface::JointStateInterface joint_state_interface_;

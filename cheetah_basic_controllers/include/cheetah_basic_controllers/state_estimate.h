@@ -10,7 +10,7 @@
 #include <hardware_interface/imu_sensor_interface.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include "cpp_types.h"
+#include <cheetah_common/cpp_types.h>
 
 namespace cheetah_ros
 {

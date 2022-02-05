@@ -51,14 +51,15 @@ void UnitreeHW::read(const ros::Time& time, const ros::Duration& period)
   imu_data_.linear_acc[1] = low_state.imu.accelerometer[1];
   imu_data_.linear_acc[2] = low_state.imu.accelerometer[2];
 
-  for (int i = 0; i < 4; ++i)
-  {
-    contact_state_[i] = low_state.footForce[i] > contact_threshold_[i];
-    if (contact_state_[i])
-      ROS_ERROR_STREAM("Contact: " << i);
-  }
+  contact_state_[LegPrefix::FL] = low_state.footForce[UNITREE_LEGGED_SDK::FL_] > contact_threshold_;
+  contact_state_[LegPrefix::FR] = low_state.footForce[UNITREE_LEGGED_SDK::FR_] > contact_threshold_;
+  contact_state_[LegPrefix::RL] = low_state.footForce[UNITREE_LEGGED_SDK::RL_] > contact_threshold_;
+  contact_state_[LegPrefix::RR] = low_state.footForce[UNITREE_LEGGED_SDK::RR_] > contact_threshold_;
 
-  //  ROS_ERROR_STREAM("Force: " << low_state.footForce[0] << ", " << low_state.footForce[1] << ", "
+  //  for (int i = 0; i < 4; ++i)
+  //    if (contact_state_[i])
+  //      ROS_INFO_STREAM("Contact: " << i);
+  //  ROS_INFO_STREAM("Force: " << low_state.footForce[0] << ", " << low_state.footForce[1] << ", "
   //                             << low_state.footForce[2] << ", " << low_state.footForce[3]);
 
   // Set feedforward and velocity cmd to zero to avoid for saft when not controller setCommand
@@ -144,13 +145,9 @@ bool UnitreeHW::setupImu()
 
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh)
 {
-  XmlRpc::XmlRpcValue contact_threshold;
-  if (nh.getParam("contact_threshold", contact_threshold))
-    if (contact_threshold.getType() == XmlRpc::XmlRpcValue::TypeArray)
-      if (contact_threshold.size() == 4)
-        for (int i = 0; i < 4; ++i)
-          contact_threshold_[i] = contact_threshold[i];
-  contact_sensor_interface_.registerHandle(cheetah_ros::ContactSensorHandle("foot", contact_state_));
+  nh.getParam("contact_threshold", contact_threshold_);
+
+  contact_sensor_interface_.registerHandle(cheetah_ros::ContactSensorHandle("feet", contact_state_));
   registerInterface(&contact_sensor_interface_);
   return true;
 }

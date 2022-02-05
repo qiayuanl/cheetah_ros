@@ -6,8 +6,9 @@
  */
 #pragma once
 
-#include "cpp_types.h"
+#include <cheetah_common/cpp_types.h>
 #include "interpolation.h"
+
 namespace cheetah_ros
 {
 /*!
