@@ -83,6 +83,7 @@ LinearKFPosVelEstimator::LinearKFPosVelEstimator(ros::NodeHandle& nh) : StateEst
   a_.block(3, 3, 3, 3) = Eigen::Matrix<double, 3, 3>::Identity();
   a_.block(6, 6, 12, 12) = Eigen::Matrix<double, 12, 12>::Identity();
   b_.setZero();
+  b_.block(0, 0, 3, 3) = 0.5 * dt * dt * Eigen::Matrix<double, 3, 3>::Identity();
   b_.block(3, 0, 3, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> c1(3, 6);
@@ -114,40 +115,38 @@ LinearKFPosVelEstimator::LinearKFPosVelEstimator(ros::NodeHandle& nh) : StateEst
 
 void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
 {
-  double process_noise_pimu = 0.02;
-  double process_noise_vimu = 0.02;
-  double process_noise_pfoot = 0.002;
-  double sensor_noise_pimu_rel_foot = 0.001;
-  double sensor_noise_vimu_rel_foot = 0.1;
-  double sensor_noise_zfoot = 0.001;
+  double imu_process_noise_position = 0.02;
+  double imu_process_noise_velocity = 0.02;
+  double foot_process_noise_position = 0.002;
+  double foot_sensor_noise_position = 0.001;
+  double foot_sensor_noise_velocity = 0.1;
+  double foot_height_sensor_noise = 0.001;
   Eigen::Matrix<double, 18, 18> q = Eigen::Matrix<double, 18, 18>::Identity();
-  q.block(0, 0, 3, 3) = q_.block(0, 0, 3, 3) * process_noise_pimu;
-  q.block(3, 3, 3, 3) = q_.block(3, 3, 3, 3) * process_noise_vimu;
-  q.block(6, 6, 12, 12) = q_.block(6, 6, 12, 12) * process_noise_pfoot;
+  q.block(0, 0, 3, 3) = q_.block(0, 0, 3, 3) * imu_process_noise_position;
+  q.block(3, 3, 3, 3) = q_.block(3, 3, 3, 3) * imu_process_noise_velocity;
+  q.block(6, 6, 12, 12) = q_.block(6, 6, 12, 12) * foot_process_noise_position;
 
   Eigen::Matrix<double, 28, 28> r = Eigen::Matrix<double, 28, 28>::Identity();
-  r.block(0, 0, 12, 12) = r_.block(0, 0, 12, 12) * sensor_noise_pimu_rel_foot;
-  r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * sensor_noise_vimu_rel_foot;
-  r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * sensor_noise_zfoot;
-
-  int qindex;
-  int rindex2;
-  int rindex3;
+  r.block(0, 0, 12, 12) = r_.block(0, 0, 12, 12) * foot_sensor_noise_position;
+  r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * foot_sensor_noise_velocity;
+  r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * foot_height_sensor_noise;
 
   for (int i = 0; i < 4; i++)
   {
     int i1 = 3 * i;
 
-    qindex = 6 + i1;
-    rindex2 = 12 + i1;
-    rindex3 = 24 + i;
+    int q_index = 6 + i1;
+    int r_index1 = i1;
+    int r_index2 = 12 + i1;
+    int r_index3 = 24 + i;
 
     double high_suspect_number(100);
-    q.block(qindex, qindex, 3, 3) =
-        (state.contact_state_[i] ? 1. : high_suspect_number) * q.block(qindex, qindex, 3, 3);
-    r.block(rindex2, rindex2, 3, 3) =
-        (state.contact_state_[i] ? 1. : high_suspect_number) * r.block(rindex2, rindex2, 3, 3);
-    r(rindex3, rindex3) = (state.contact_state_[i] ? 1. : high_suspect_number) * r(rindex3, rindex3);
+    q.block(q_index, q_index, 3, 3) =
+        (state.contact_state_[i] ? 1. : high_suspect_number) * q.block(q_index, q_index, 3, 3);
+    r.block(r_index1, r_index1, 3, 3) = 1. * r.block(r_index1, r_index1, 3, 3);
+    r.block(r_index2, r_index2, 3, 3) =
+        (state.contact_state_[i] ? 1. : high_suspect_number) * r.block(r_index2, r_index2, 3, 3);
+    r(r_index3, r_index3) = (state.contact_state_[i] ? 1. : high_suspect_number) * r(r_index3, r_index3);
 
     ps_.segment(3 * i, 3) = state.pos_ - state.foot_pos_[i];
     vs_.segment(3 * i, 3) = -state.foot_vel_[i];
