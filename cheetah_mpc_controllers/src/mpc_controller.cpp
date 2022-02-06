@@ -40,7 +40,7 @@ void MpcController::updateCommand(const ros::Time& time, const ros::Duration& pe
   for (int i = 0; i < 4; ++i)
     if (gait_table_[i] == 1)
       setStand(LegPrefix(i), solution[i]);
-  ROS_ERROR_STREAM(gait_table_);
+
   FeetController::updateCommand(time, period);
 }
 
