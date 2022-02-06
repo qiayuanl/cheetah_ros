@@ -46,7 +46,7 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
 {
   bool ret = DefaultRobotHWSim::initSim(robot_namespace, model_nh, parent_model, urdf_model, transmissions);
   // Joint interface
-  gazebo_ros_control::DefaultRobotHWSim::registerInterface(&hybrid_joint_interface_);
+  registerInterface(&hybrid_joint_interface_);
   std::vector<std::string> names = ej_interface_.getNames();
   for (const auto& name : names)
   {
@@ -59,7 +59,7 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   }
 
   // IMU interface
-  gazebo_ros_control::DefaultRobotHWSim::registerInterface(&imu_sensor_interface_);
+  registerInterface(&imu_sensor_interface_);
   XmlRpc::XmlRpcValue xml_rpc_value;
   if (!model_nh.getParam("gazebo/imus", xml_rpc_value))
     ROS_WARN("No imu specified");
@@ -67,6 +67,13 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
     parseImu(xml_rpc_value, parent_model);
   if (!model_nh.getParam("gazebo/delay", delay_))
     delay_ = 0.;
+
+  contact_sensor_interface_.registerHandle(ContactSensorHandle("feet", contact_state_));
+  registerInterface(&contact_sensor_interface_);
+
+  for (bool& i : contact_state_)
+    i = true;
+
   return ret;
 }
 

@@ -95,7 +95,7 @@ LinearKFPosVelEstimator::LinearKFPosVelEstimator(ros::NodeHandle& nh) : StateEst
   c_.block(3, 0, 3, 6) = c1;
   c_.block(6, 0, 3, 6) = c1;
   c_.block(9, 0, 3, 6) = c1;
-  c_.block(0, 6, 12, 12) = -1. * Eigen::Matrix<double, 12, 12>::Identity();
+  c_.block(0, 6, 12, 12) = Eigen::Matrix<double, 12, 12>::Identity();
   c_.block(12, 0, 3, 6) = c2;
   c_.block(15, 0, 3, 6) = c2;
   c_.block(18, 0, 3, 6) = c2;
@@ -149,7 +149,7 @@ void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
     r(r_index3, r_index3) = (state.contact_state_[i] ? 1. : high_suspect_number) * r(r_index3, r_index3);
 
     ps_.segment(3 * i, 3) = state.pos_ - state.foot_pos_[i];
-    vs_.segment(3 * i, 3) = -state.foot_vel_[i];
+    vs_.segment(3 * i, 3) = state.linear_vel_ - state.foot_vel_[i];
   }
 
   Vec3<double> g(0, 0, -9.81);

@@ -40,11 +40,11 @@
 #include <deque>
 
 #include <gazebo_ros_control/default_robot_hw_sim.h>
-#include <gazebo/sensors/sensors.hh>
 #include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 
 #include <cheetah_common/hardware_interface/hybrid_joint_interface.h>
+#include <cheetah_common/hardware_interface/contact_sensor_interface.h>
 
 namespace cheetah_ros
 {
@@ -84,12 +84,13 @@ private:
   void parseImu(XmlRpc::XmlRpcValue& imu_datas, const gazebo::physics::ModelPtr& parent_model);
 
   HybridJointInterface hybrid_joint_interface_;
+  ContactSensorInterface contact_sensor_interface_;
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
   std::list<HybridJointData> hybrid_joint_datas_;
   std::list<ImuData> imu_datas_;
+  bool contact_state_[4];
   std::unordered_map<std::string, std::deque<HybridJointCommand> > cmd_buffer_;
   double delay_;
-  gazebo::sensors::ContactSensorPtr contact_sensor_;
 };
 
 }  // namespace cheetah_ros
