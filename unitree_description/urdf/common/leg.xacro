@@ -166,6 +166,10 @@
             </inertial>
         </link>
 
+        <gazebo reference="${prefix}_foot_fixed">
+            <disableFixedJointLumping>true</disableFixedJointLumping>
+        </gazebo>
+
         <xacro:leg_transmission name="${prefix}"/>
     </xacro:macro>
 </robot>

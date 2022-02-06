@@ -86,11 +86,14 @@ private:
   HybridJointInterface hybrid_joint_interface_;
   ContactSensorInterface contact_sensor_interface_;
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
+
+  gazebo::physics::ContactManager* contact_manager_;
+
   std::list<HybridJointData> hybrid_joint_datas_;
   std::list<ImuData> imu_datas_;
-  bool contact_state_[4];
   std::unordered_map<std::string, std::deque<HybridJointCommand> > cmd_buffer_;
   double delay_;
+  bool contact_state_[4];
 };
 
 }  // namespace cheetah_ros

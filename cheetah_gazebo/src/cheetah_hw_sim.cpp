@@ -37,6 +37,7 @@
 
 #include "cheetah_gazebo/cheetah_hw_sim.h"
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
+#include <cheetah_common/cpp_types.h>
 
 namespace cheetah_ros
 {
@@ -57,7 +58,6 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
     cmd_buffer_.insert(
         std::make_pair<std::string, std::deque<HybridJointCommand>>(name.c_str(), std::deque<HybridJointCommand>()));
   }
-
   // IMU interface
   registerInterface(&imu_sensor_interface_);
   XmlRpc::XmlRpcValue xml_rpc_value;
@@ -68,12 +68,10 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   if (!model_nh.getParam("gazebo/delay", delay_))
     delay_ = 0.;
 
+  // Contact Sensor interface
   contact_sensor_interface_.registerHandle(ContactSensorHandle("feet", contact_state_));
   registerInterface(&contact_sensor_interface_);
-
-  for (bool& i : contact_state_)
-    i = true;
-
+  contact_manager_ = parent_model->GetWorld()->Physics()->GetContactManager();
   return ret;
 }
 
@@ -98,6 +96,22 @@ void CheetahHWSim::readSim(ros::Time time, ros::Duration period)
     imu.linear_acc[0] = accel.X();
     imu.linear_acc[1] = accel.Y();
     imu.linear_acc[2] = accel.Z();
+  }
+
+  for (bool& state : contact_state_)
+    state = false;
+  for (const auto& contact : contact_manager_->GetContacts())
+  {
+    std::string link_name;
+    if (contact->collision1->GetLink()->GetName().find("foot") != std::string::npos)
+      link_name = contact->collision1->GetLink()->GetName();
+    else if (contact->collision2->GetLink()->GetName().find("foot") != std::string::npos)
+      link_name = contact->collision2->GetLink()->GetName();
+    else
+      continue;
+    for (int i = 0; i < 4; ++i)
+      if (link_name.find(LEG_PREFIX[i]) != std::string::npos)
+        contact_state_[i] = true;
   }
 
   // Set cmd to zero to avoid crazy soft limit oscillation when not controller loaded
