@@ -37,8 +37,8 @@ public:
       {
         int progress = iter - offsets_[j] * horizon;
         if (progress < 0)
-          progress += 1.;
-        if (progress > durations_[j] * horizon)
+          progress += horizon;
+        if (progress >= durations_[j] * horizon)
           mpc_table[i * 4 + j] = 0;
         else
           mpc_table[i * 4 + j] = 1;
@@ -47,34 +47,11 @@ public:
     return mpc_table;
   }
 
-  Vec4<int> getContactState()
-  {
-    Vec4<int> state;
-
-    for (int i = 0; i < 4; i++)
-    {
-      T progress = phase_ - offsets_[i];
-      if (progress < 0)
-        progress += 1.;
-      if (progress > durations_[i])
-        progress = 0;
-      else
-        progress = 1;
-      state[i] = progress;
-    }
-    return state;
-  }
-
   Vec4<T> getSwingTime()
   {
     Vec4<T> ones;
     ones.setOnes();
     return (ones - durations_) * cycle_;
-  }
-
-  Vec4<T> getStandTime()
-  {
-    return durations_ * cycle_;
   }
 
   T getCycle()

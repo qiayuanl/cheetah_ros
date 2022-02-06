@@ -63,6 +63,7 @@ link_directories(
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
         src/mpc_formulation.cpp
+        src/mpc_controller.cpp
         src/locomotion.cpp
         )
 
