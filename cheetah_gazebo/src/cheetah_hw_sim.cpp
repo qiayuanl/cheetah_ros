@@ -72,6 +72,8 @@ bool CheetahHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle m
   contact_sensor_interface_.registerHandle(ContactSensorHandle("feet", contact_state_));
   registerInterface(&contact_sensor_interface_);
   contact_manager_ = parent_model->GetWorld()->Physics()->GetContactManager();
+  contact_manager_->SetNeverDropContacts(true);  // NOTE: If false, we need to select view->contacts in gazebo GUI to
+                                                 // avoid returning nothing when calling ContactManager::GetContacts()
   return ret;
 }
 
@@ -102,6 +104,9 @@ void CheetahHWSim::readSim(ros::Time time, ros::Duration period)
     state = false;
   for (const auto& contact : contact_manager_->GetContacts())
   {
+    if (static_cast<uint32_t>(contact->time.sec) != time.sec ||
+        static_cast<uint32_t>(contact->time.nsec) != (time - period).nsec)
+      continue;
     std::string link_name;
     if (contact->collision1->GetLink()->GetName().find("foot") != std::string::npos)
       link_name = contact->collision1->GetLink()->GetName();
