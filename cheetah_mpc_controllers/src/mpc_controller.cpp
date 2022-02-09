@@ -60,7 +60,7 @@ void MpcController::dynamicCallback(WeightConfig& config, uint32_t /*level*/)  /
   weight << config.ori_roll, config.ori_pitch, config.ori_yaw, config.pos_x, config.pos_y, config.pos_z,
       config.rate_roll, config.rate_pitch, config.rate_yaw, config.vel_x, config.vel_y, config.vel_z, 0.;
   horizon_ = config.horizon;
-  solver_->setup(config.dt, config.horizon, 200., weight, config.alpha);
+  solver_->setup(config.dt, config.horizon, 200., weight, config.alpha, 1.0);
   ROS_INFO("[Mpc] Dynamic params update");
 }
 

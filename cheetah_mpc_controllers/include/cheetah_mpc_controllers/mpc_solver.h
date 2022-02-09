@@ -21,19 +21,22 @@ public:
     solution_.resize(4);
   }
 
-  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha)
+  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha,
+             double final_cost_scale)
   {
     dt_ = dt;
     f_max_ = f_max;
     weight_ = weight;
     alpha_ = alpha;
     horizon_ = horizon;
-    mpc_formulation_.setup(horizon, weight, alpha);
+    final_cost_scale_ = final_cost_scale;
+    mpc_formulation_.setup(horizon, weight, alpha, final_cost_scale);
   }
 
-  void setHorizon(int horizon)
+  void setHorizon(int horizon, double final_cost_scale)
   {
     horizon_ = horizon;
+    final_cost_scale_ = final_cost_scale;
   }
 
   void solve(ros::Time time, const RobotState& state, const VectorXd& gait_table, const Matrix<double, Dynamic, 1>& traj)
@@ -47,8 +50,8 @@ public:
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
       {
-        if (horizon_ != mpc_formulation_.horizon_)
-          setup(dt_, horizon_, f_max_, weight_, alpha_);
+        if (horizon_ != mpc_formulation_.horizon_ || final_cost_scale_ != mpc_formulation_.final_cost_scale_)
+          setup(dt_, horizon_, f_max_, weight_, alpha_, final_cost_scale_);
 
         last_update_ = time;
         state_ = state;
@@ -94,6 +97,7 @@ protected:
   std::mutex mutex_;
   std::shared_ptr<std::thread> thread_;
   int horizon_;
+  double final_cost_scale_;
 
 private:
   void formulate()
@@ -105,8 +109,6 @@ private:
     mpc_formulation_.buildConstrainMat(mu_);
     mpc_formulation_.buildConstrainUpperBound(f_max_, gait_table_);
     mpc_formulation_.buildConstrainLowerBound();
-    mpc_formulation_.buildStateUpperBound(traj_.block<12, 1>(12 * (mpc_formulation_.horizon_ - 1), 0));
-    mpc_formulation_.buildStateLowerBound(traj_.block<12, 1>(12 * (getHorizon() - 1), 0));
   }
 
   ros::Time last_update_;
@@ -139,9 +141,8 @@ protected:
     qp_problem.setOptions(options);
     int n_wsr = 100;
     qpOASES::returnValue rvalue =
-        qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.a_.data(),
-                        mpc_formulation_.lb_.data(), mpc_formulation_.ub_.data(), mpc_formulation_.lb_a_.data(),
-                        mpc_formulation_.ub_a_.data(), n_wsr);
+        qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.a_.data(), nullptr,
+                        nullptr, mpc_formulation_.lb_a_.data(), mpc_formulation_.ub_a_.data(), n_wsr);
     printFailedInit(rvalue);
 
     if (rvalue != qpOASES::SUCCESSFUL_RETURN)

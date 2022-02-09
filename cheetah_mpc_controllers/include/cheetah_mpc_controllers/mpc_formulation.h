@@ -26,7 +26,7 @@ public:
   static constexpr int ACTION_DIM = 12;  // 4 ground reaction force.
   const double BIG_VALUE = 1e10;
 
-  void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha);
+  void setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha, double final_cost_scale);
 
   void buildStateSpace(double mass, const Matrix3d& inertia, const RobotState& state);
   void buildQp(double dt);
@@ -36,10 +36,9 @@ public:
   const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& buildConstrainMat(double mu);
   const VectorXd& buildConstrainUpperBound(double f_max, const VectorXd& gait_table);
   const VectorXd& buildConstrainLowerBound();
-  const VectorXd& buildStateUpperBound(const Matrix<double, Dynamic, 1>& final_state);
-  const VectorXd& buildStateLowerBound(const Matrix<double, Dynamic, 1>& final_state);
 
   int horizon_;
+  double final_cost_scale_;
 
   // Final QP Formation
   // 1/2 U^{-T} H U + U^{T} g
@@ -48,8 +47,6 @@ public:
   Matrix<double, Dynamic, Dynamic, Eigen::RowMajor> a_;  // constrain matrix
   VectorXd ub_a_;                                        // upper bound of output
   VectorXd lb_a_;                                        // lower bound of output
-  VectorXd ub_;                                          // upper bound of state(variable)
-  VectorXd lb_;                                          // lower bound of state(variable)
 
 private:
   // State Space Model

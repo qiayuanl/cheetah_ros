@@ -7,12 +7,15 @@
 #include "cheetah_mpc_controllers/mpc_formulation.h"
 
 #include <unsupported/Eigen/MatrixFunctions>
+#include <ros/ros.h>
 
 namespace cheetah_ros
 {
-void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha)
+void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weight, double alpha,
+                           double final_cost_scale)
 {
   horizon_ = horizon;
+  final_cost_scale_ = final_cost_scale;
   // Resize
   a_c_.resize(STATE_DIM, STATE_DIM);
   b_c_.resize(STATE_DIM, ACTION_DIM);
@@ -25,8 +28,6 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   a_.resize(5 * 4 * horizon, ACTION_DIM * horizon);
   ub_a_.resize(5 * 4 * horizon, Eigen::NoChange);
   lb_a_.resize(5 * 4 * horizon, Eigen::NoChange);
-  ub_.resize(STATE_DIM * horizon, Eigen::NoChange);
-  lb_.resize(STATE_DIM * horizon, Eigen::NoChange);
   // Set Zero
   a_c_.setZero();
   b_c_.setZero();
@@ -35,6 +36,7 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   b_qp_.setZero();
   l_.setZero();
   l_.diagonal() = weight.replicate(horizon, 1);
+  l_.diagonal().block((horizon - 1) * STATE_DIM, 0, STATE_DIM, 1) *= final_cost_scale;
   alpha_.setIdentity();
   alpha_ = alpha * alpha_;
 }
@@ -169,22 +171,6 @@ const VectorXd& MpcFormulation::buildConstrainLowerBound()
 {
   lb_a_.setZero();
   return lb_a_;
-}
-
-const VectorXd& MpcFormulation::buildStateUpperBound(const Matrix<double, Dynamic, 1>& final_state)
-{
-  ub_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, BIG_VALUE);
-  //  for (int i = 0; i < 12; ++i)
-  //    ub_[(horizon_ - 1) * STATE_DIM + i] = final_state[i];
-  return ub_;
-}
-
-const VectorXd& MpcFormulation::buildStateLowerBound(const Matrix<double, Dynamic, 1>& final_state)
-{
-  lb_ = MatrixXd::Constant(STATE_DIM * horizon_, 1, -BIG_VALUE);
-  //  for (int i = 0; i < 12; ++i)
-  //    lb_[(horizon_ - 1) * STATE_DIM + i] = final_state[i];
-  return lb_;
 }
 
 }  // namespace cheetah_ros
