@@ -139,7 +139,7 @@ protected:
     //    options.enableEqualities = qpOASES::BT_TRUE;
     options.printLevel = qpOASES::PL_NONE;
     qp_problem.setOptions(options);
-    int n_wsr = 100;
+    int n_wsr = 200;
     qpOASES::returnValue rvalue =
         qp_problem.init(mpc_formulation_.h_.data(), mpc_formulation_.g_.data(), mpc_formulation_.a_.data(), nullptr,
                         nullptr, mpc_formulation_.lb_a_.data(), mpc_formulation_.ub_a_.data(), n_wsr);
