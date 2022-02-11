@@ -35,6 +35,8 @@ private:
 
   // Dynamic reconfigure
   std::shared_ptr<dynamic_reconfigure::Server<cheetah_ros::WeightConfig>> dynamic_srv_{};
+  realtime_tools::RealtimeBuffer<cheetah_ros::WeightConfig> weight_buffer_;
+  bool dynamic_initialized_;
 };
 
 }  // namespace cheetah_ros
