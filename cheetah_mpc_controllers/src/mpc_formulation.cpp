@@ -7,7 +7,6 @@
 #include "cheetah_mpc_controllers/mpc_formulation.h"
 
 #include <unsupported/Eigen/MatrixFunctions>
-#include <ros/ros.h>
 
 namespace cheetah_ros
 {
@@ -144,7 +143,7 @@ const Matrix<double, Dynamic, Dynamic, Eigen::RowMajor>& MpcFormulation::buildCo
   a_.setZero();
   double mu_inv = 1.f / mu;
   Matrix<double, 5, 3> a_block;
-  a_block << mu_inv, 0, 1.f, -mu_inv, 0, 1.f, 0, mu_inv, 1.f, 0, -mu_inv, 1.f, 0, 0, 1.f;
+  a_block << mu_inv, 0, 1., -mu_inv, 0, 1., 0, mu_inv, 1., 0, -mu_inv, 1., 0, 0, 1.;
   for (int i = 0; i < horizon_ * 4; i++)
     a_.block(i * 5, i * 3, 5, 3) = a_block;
   return a_;

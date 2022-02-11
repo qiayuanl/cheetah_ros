@@ -161,10 +161,9 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
   if (time - last_publish_ > ros::Duration(0.01))  // 100Hz
   {
     last_publish_ = time;
-    cheetah_msgs::LegsState legs_state;
-    legs_state.header.stamp = time;
     if (state_pub_->trylock())
     {
+      state_pub_->msg_.header.stamp = time;
       for (int leg = 0; leg < 4; ++leg)
       {
         state_pub_->msg_.foot_pos[leg].x = robot_state_.foot_pos_[leg].x();
@@ -176,6 +175,8 @@ void ControllerBase::publishState(const ros::Time& time, const ros::Duration& pe
         state_pub_->msg_.foot_force[leg].x = leg_cmd_[leg].ff_cartesian_[0];
         state_pub_->msg_.foot_force[leg].y = leg_cmd_[leg].ff_cartesian_[1];
         state_pub_->msg_.foot_force[leg].z = leg_cmd_[leg].ff_cartesian_[2];
+        if (std::abs(leg_cmd_[leg].ff_cartesian_.norm()) > 1e3)
+          ROS_ERROR_STREAM(leg_cmd_[leg].ff_cartesian_);
       }
       state_pub_->unlockAndPublish();
     }

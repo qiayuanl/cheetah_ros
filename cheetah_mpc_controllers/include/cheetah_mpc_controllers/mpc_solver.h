@@ -19,6 +19,8 @@ public:
     : mass_(mass), gravity_(gravity), mu_(mu), inertia_(inertia)
   {
     solution_.resize(4);
+    for (auto& solution : solution_)
+      solution.setZero();
   }
 
   void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha,
@@ -170,6 +172,8 @@ protected:
       solution_[leg].x() = qp_sol[3 * leg];
       solution_[leg].y() = qp_sol[3 * leg + 1];
       solution_[leg].z() = qp_sol[3 * leg + 2];
+      if (solution_[leg].norm() > 1e3)
+        ROS_ERROR_STREAM(solution_[leg]);
     }
   }
 
