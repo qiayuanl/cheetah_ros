@@ -33,9 +33,12 @@ public:
     mpc_formulation_.setup(horizon, weight, alpha, final_cost_scale);
   }
 
-  void setHorizon(int horizon, double final_cost_scale)
+  void setHorizon(int horizon, double dt, double final_cost_scale)
   {
+    if (horizon_ != horizon || dt_ != dt || final_cost_scale_ != final_cost_scale)
+      horizon_changed_ = true;
     horizon_ = horizon;
+    dt_ = dt;
     final_cost_scale_ = final_cost_scale;
   }
 
@@ -50,9 +53,12 @@ public:
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
       {
-        if (horizon_ != mpc_formulation_.horizon_ || final_cost_scale_ != mpc_formulation_.final_cost_scale_)
+        if (horizon_changed_)
+        {
+          horizon_changed_ = false;
           setup(dt_, horizon_, f_max_, weight_, alpha_, final_cost_scale_);
-
+          //          ROS_INFO_STREAM("horizon: " << horizon_ << " dt: " << dt_);
+        }
         last_update_ = time;
         state_ = state;
         gait_table_ = gait_table;
@@ -122,6 +128,8 @@ private:
   // Only for setHorizon()
   Matrix<double, 13, 1> weight_;
   double alpha_;
+
+  bool horizon_changed_;
 };
 
 class QpOasesSolver : public MpcSolverBase
