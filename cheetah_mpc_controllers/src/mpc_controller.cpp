@@ -44,7 +44,8 @@ bool MpcController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle&
     dynamic_initialized_ = true;
 
   // TODO: Add interface
-  double mass = 22.;
+  //  double mass = 22.5; Gazebo
+  double mass = 22.5;
   Matrix3d inertia;
   inertia << 0.050874, 0., 0., 0., 0.64036, 0., 0., 0., 0.6565;
 
