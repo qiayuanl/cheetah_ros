@@ -154,7 +154,7 @@ void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
 
   Vec3<double> g(0, 0, -9.81);
   Vec3<double> accel = quaternionToRotationMatrix(state.quat_) * state.accel_ + g;
-  Vec4<double> pzs = Vec4<double>::Zero();
+  Vec4<double> pzs = -0.0265 * Vec4<double>::Ones();
 
   Eigen::Matrix<double, 28, 1> y;
   y << ps_, vs_, pzs;
