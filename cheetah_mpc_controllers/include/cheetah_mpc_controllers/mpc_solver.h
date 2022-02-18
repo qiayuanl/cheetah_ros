@@ -23,9 +23,10 @@ public:
       solution.setZero();
   }
 
-  void setup(double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight, double alpha,
-             double final_cost_scale)
+  void setup(double update_rate, double dt, int horizon, double f_max, const Matrix<double, 13, 1>& weight,
+             double alpha, double final_cost_scale)
   {
+    update_rate_ = update_rate;
     dt_ = dt;
     f_max_ = f_max;
     weight_ = weight;
@@ -50,7 +51,7 @@ public:
 
     if (dt < 0)  // Simulation reset
       last_update_ = time;
-    if (dt > dt_)
+    if (dt > 1. / update_rate_)
     {
       std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
       if (guard.owns_lock())
@@ -58,7 +59,7 @@ public:
         if (horizon_changed_)
         {
           horizon_changed_ = false;
-          setup(dt_, horizon_, f_max_, weight_, alpha_, final_cost_scale_);
+          setup(update_rate_, dt_, horizon_, f_max_, weight_, alpha_, final_cost_scale_);
           //          ROS_INFO_STREAM("horizon: " << horizon_ << " dt: " << dt_);
         }
         last_update_ = time;
@@ -120,6 +121,7 @@ private:
   }
 
   ros::Time last_update_;
+  double update_rate_;
 
   double dt_, mass_, gravity_, mu_, f_max_;
   Matrix3d inertia_;

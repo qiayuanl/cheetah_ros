@@ -36,6 +36,7 @@ bool MpcController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle&
         config.alpha = xmlRpcGetDouble(mpc_params["alpha"]);
         config.horizon = mpc_params["horizon"];
         config.dt = xmlRpcGetDouble(mpc_params["dt"]);
+        config.update_rate = xmlRpcGetDouble(mpc_params["update_rate"]);
         weight_buffer_.initRT(config);
         dynamic_initialized_ = false;
       }
@@ -109,13 +110,14 @@ void MpcController::dynamicCallback(WeightConfig& config, uint32_t /*level*/)  /
     config.alpha = init_config.alpha;
     config.horizon = init_config.horizon;
     config.dt = init_config.dt;
+    config.update_rate = init_config.update_rate;
   }
 
   Matrix<double, 13, 1> weight;
   weight << config.ori_roll, config.ori_pitch, config.ori_yaw, config.pos_x, config.pos_y, config.pos_z,
       config.rate_roll, config.rate_pitch, config.rate_yaw, config.vel_x, config.vel_y, config.vel_z, 0.;
   horizon_ = config.horizon;
-  solver_->setup(config.dt, config.horizon, 200., weight, config.alpha, 1.0);
+  solver_->setup(config.update_rate, config.dt, config.horizon, 200., weight, config.alpha, 1.0);
   ROS_INFO("[Mpc] Dynamic params update");
 }
 
