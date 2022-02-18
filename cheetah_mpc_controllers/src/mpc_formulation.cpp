@@ -6,6 +6,8 @@
 
 #include "cheetah_mpc_controllers/mpc_formulation.h"
 
+#include <cheetah_common/math_utilities.h>
+
 #include <unsupported/Eigen/MatrixFunctions>
 
 namespace cheetah_ros

@@ -69,19 +69,7 @@ public:
 
 private:
   hardware_interface::ImuSensorHandle imu_;
+  double initial_yaw_;
 };
-
-template <typename T>
-Mat3<T> quaternionToRotationMatrix(const Eigen::Quaternion<T>& q)
-{
-  T w = q.w();
-  T x = q.x();
-  T y = q.y();
-  T z = q.z();
-  Mat3<T> r;
-  r << 1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y), 2 * (x * y + w * z), 1 - 2 * (x * x + z * z),
-      2 * (y * z - w * x), 2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y);
-  return r;
-}
 
 }  // namespace cheetah_ros

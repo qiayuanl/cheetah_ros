@@ -2,6 +2,7 @@
 // Created by qiayuan on 2021/11/15.
 //
 #include "cheetah_basic_controllers/state_estimate.h"
+#include <cheetah_common/math_utilities.h>
 
 namespace cheetah_ros
 {
@@ -189,7 +190,7 @@ void LinearKFPosVelEstimator::update(ros::Time time, RobotState& state)
 }
 
 ImuSensorEstimator::ImuSensorEstimator(ros::NodeHandle& nh, hardware_interface::ImuSensorHandle imu)
-  : StateEstimateBase(nh), imu_(std::move(imu))
+  : StateEstimateBase(nh), imu_(std::move(imu)), initial_yaw_(0)
 {
 }
 
@@ -197,6 +198,11 @@ void ImuSensorEstimator::update(ros::Time time, RobotState& state)
 {
   state.quat_.coeffs() << imu_.getOrientation()[0], imu_.getOrientation()[1], imu_.getOrientation()[2],
       imu_.getOrientation()[3];
+  if (initial_yaw_ == 0)
+    initial_yaw_ = quatToRPY(state.quat_)(2);
+
+  Eigen::Quaternion<double> yaw = RpyToQuat(Vec3<double>(0., 0., -initial_yaw_));
+  state.quat_ *= yaw;
   state.angular_vel_ << imu_.getAngularVelocity()[0], imu_.getAngularVelocity()[1], imu_.getAngularVelocity()[2];
   state.accel_ << imu_.getLinearAcceleration()[0], imu_.getLinearAcceleration()[1], imu_.getLinearAcceleration()[2];
 }

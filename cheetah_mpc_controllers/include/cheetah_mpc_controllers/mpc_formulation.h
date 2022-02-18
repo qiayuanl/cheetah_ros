@@ -61,28 +61,4 @@ private:
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> alpha_;  // u cost
 };
 
-template <typename T>
-T square(T a)
-{
-  return a * a;
-}
-
-/*!
- * Convert a quaternion to RPY.  Uses ZYX order (yaw-pitch-roll), but returns
- * angles in (roll, pitch, yaw).
- */
-template <typename T>
-Vec3<T> quatToRPY(const Eigen::Quaternion<T>& q)
-{
-  Vec3<T> rpy;
-
-  T as = std::min(-2. * (q.x() * q.z() - q.w() * q.y()), .99999);
-  rpy(2) =
-      std::atan2(2 * (q.x() * q.y() + q.w() * q.z()), square(q.w()) + square(q.x()) - square(q.y()) - square(q.z()));
-  rpy(1) = std::asin(as);
-  rpy(0) =
-      std::atan2(2 * (q.y() * q.z() + q.w() * q.x()), square(q.w()) - square(q.x()) - square(q.y()) + square(q.z()));
-  return rpy;
-}
-
 }  // namespace cheetah_ros
