@@ -13,6 +13,7 @@ add_message_files(
         LegsCmd.msg
         LegsState.msg
         FeetCmd.msg
+        MotorState.msg
 )
 
 # Generate added messages and services with any dependencies listed here

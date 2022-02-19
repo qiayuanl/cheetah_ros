@@ -21,7 +21,8 @@
 #include <cheetah_common/hardware_interface/contact_sensor_interface.h>
 #include <cheetah_common/cpp_types.h>
 #include <hardware_interface/imu_sensor_interface.h>
-
+#include <realtime_tools/realtime_publisher.h>
+#include <cheetah_msgs/MotorState.h>
 #include "unitree_legged_sdk/udp.h"
 #include "unitree_legged_sdk/safety.h"
 
@@ -99,6 +100,8 @@ private:
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
+  void publishMotorState(const ros::Time& time);
+
   std::shared_ptr<UNITREE_LEGGED_SDK::UDP> udp_;
   std::shared_ptr<UNITREE_LEGGED_SDK::Safety> safety_;
   UNITREE_LEGGED_SDK::LowState low_state_{};
@@ -119,8 +122,8 @@ private:
   std::string urdf_string_;                  // for transmission
   std::shared_ptr<urdf::Model> urdf_model_;  // for limit
 
-  //  ros::Time last_publish_time_;
-  //  std::shared_ptr<realtime_tools::RealtimePublisher<rm_msgs::ActuatorState>> actuator_state_pub_;
+  ros::Time last_publish_time_;
+  std::shared_ptr<realtime_tools::RealtimePublisher<cheetah_msgs::MotorState>> actuator_state_pub_;
 };
 
 }  // namespace cheetah_ros

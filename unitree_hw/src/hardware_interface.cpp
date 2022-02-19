@@ -23,7 +23,8 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
 
   safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(UNITREE_LEGGED_SDK::LeggedType::Aliengo);
 
-  // TODO Unitree motor publish
+  actuator_state_pub_.reset(
+      new realtime_tools::RealtimePublisher<cheetah_msgs::MotorState>(root_nh, "/motor_states", 100));
   return true;
 }
 
@@ -78,6 +79,7 @@ void UnitreeHW::write(const ros::Time& time, const ros::Duration& period)
   safety_->PositionLimit(low_cmd_);
   udp_->SetSend(low_cmd_);
   udp_->Send();
+  publishMotorState(time);
 }
 
 bool UnitreeHW::loadUrdf(ros::NodeHandle& root_nh)
@@ -141,6 +143,31 @@ bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh)
   contact_sensor_interface_.registerHandle(ContactSensorHandle("feet", contact_state_));
   registerInterface(&contact_sensor_interface_);
   return true;
+}
+
+void UnitreeHW::publishMotorState(const ros::Time& time)
+{
+  if (last_publish_time_ + ros::Duration(1.0 / 100.0) < time)
+  {
+    if (actuator_state_pub_->trylock())
+    {
+      cheetah_msgs::MotorState motor_state;
+      motor_state.header.stamp = time;
+      for (int i = 0; i < 20; ++i)
+      {
+        motor_state.q[i] = low_state_.motorState[i].q;
+        motor_state.dq[i] = low_state_.motorState[i].dq;
+        motor_state.tau[i] = low_state_.motorState[i].tauEst;
+        motor_state.temperature[i] = low_state_.motorState[i].temperature;
+        motor_state.q_des[i] = low_cmd_.motorCmd[i].q;
+        motor_state.dq_des[i] = low_cmd_.motorCmd[i].dq;
+        motor_state.ff[i] = low_cmd_.motorCmd[i].tau;
+      }
+      actuator_state_pub_->msg_ = motor_state;
+      actuator_state_pub_->unlockAndPublish();
+      last_publish_time_ = time;
+    }
+  }
 }
 
 }  // namespace cheetah_ros
