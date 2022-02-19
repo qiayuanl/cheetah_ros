@@ -33,7 +33,6 @@ void MpcFormulation::setup(int horizon, const Matrix<double, STATE_DIM, 1>& weig
   a_c_.setZero();
   b_c_.setZero();
   a_qp_.setZero();
-  a_c_.setZero();
   b_qp_.setZero();
   l_.setZero();
   l_.diagonal() = weight.replicate(horizon, 1);
