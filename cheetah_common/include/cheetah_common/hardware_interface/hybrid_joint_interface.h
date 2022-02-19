@@ -72,6 +72,7 @@ public:
     setVelocityDesired(vel_des);
     setKp(kp);
     setKd(kd);
+    setFeedforward(ff);
   }
   double getPositionDesired()
   {

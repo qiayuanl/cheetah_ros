@@ -30,37 +30,30 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
 void UnitreeHW::read(const ros::Time& time, const ros::Duration& period)
 {
   udp_->Recv();
-  UNITREE_LEGGED_SDK::LowState low_state;
-  udp_->GetRecv(low_state);
+  udp_->GetRecv(low_state_);
 
   for (int i = 0; i < 20; ++i)
   {
-    joint_data_[i].pos_ = low_state.motorState[i].q;
-    joint_data_[i].vel_ = low_state.motorState[i].dq;
-    joint_data_[i].tau_ = low_state.motorState[i].tauEst;
+    joint_data_[i].pos_ = low_state_.motorState[i].q;
+    joint_data_[i].vel_ = low_state_.motorState[i].dq;
+    joint_data_[i].tau_ = low_state_.motorState[i].tauEst;
   }
 
-  imu_data_.ori[0] = low_state.imu.quaternion[1];
-  imu_data_.ori[1] = low_state.imu.quaternion[2];
-  imu_data_.ori[2] = low_state.imu.quaternion[3];
-  imu_data_.ori[3] = low_state.imu.quaternion[0];
-  imu_data_.angular_vel[0] = low_state.imu.gyroscope[0];
-  imu_data_.angular_vel[1] = low_state.imu.gyroscope[1];
-  imu_data_.angular_vel[2] = low_state.imu.gyroscope[2];
-  imu_data_.linear_acc[0] = low_state.imu.accelerometer[0];
-  imu_data_.linear_acc[1] = low_state.imu.accelerometer[1];
-  imu_data_.linear_acc[2] = low_state.imu.accelerometer[2];
+  imu_data_.ori[0] = low_state_.imu.quaternion[1];
+  imu_data_.ori[1] = low_state_.imu.quaternion[2];
+  imu_data_.ori[2] = low_state_.imu.quaternion[3];
+  imu_data_.ori[3] = low_state_.imu.quaternion[0];
+  imu_data_.angular_vel[0] = low_state_.imu.gyroscope[0];
+  imu_data_.angular_vel[1] = low_state_.imu.gyroscope[1];
+  imu_data_.angular_vel[2] = low_state_.imu.gyroscope[2];
+  imu_data_.linear_acc[0] = low_state_.imu.accelerometer[0];
+  imu_data_.linear_acc[1] = low_state_.imu.accelerometer[1];
+  imu_data_.linear_acc[2] = low_state_.imu.accelerometer[2];
 
-  contact_state_[LegPrefix::FL] = low_state.footForce[UNITREE_LEGGED_SDK::FL_] > contact_threshold_;
-  contact_state_[LegPrefix::FR] = low_state.footForce[UNITREE_LEGGED_SDK::FR_] > contact_threshold_;
-  contact_state_[LegPrefix::RL] = low_state.footForce[UNITREE_LEGGED_SDK::RL_] > contact_threshold_;
-  contact_state_[LegPrefix::RR] = low_state.footForce[UNITREE_LEGGED_SDK::RR_] > contact_threshold_;
-
-  //  for (int i = 0; i < 4; ++i)
-  //    if (contact_state_[i])
-  //      ROS_INFO_STREAM("Contact: " << i);
-  //  ROS_INFO_STREAM("Force: " << low_state.footForce[0] << ", " << low_state.footForce[1] << ", "
-  //                             << low_state.footForce[2] << ", " << low_state.footForce[3]);
+  contact_state_[LegPrefix::FL] = low_state_.footForce[UNITREE_LEGGED_SDK::FL_] > contact_threshold_;
+  contact_state_[LegPrefix::FR] = low_state_.footForce[UNITREE_LEGGED_SDK::FR_] > contact_threshold_;
+  contact_state_[LegPrefix::RL] = low_state_.footForce[UNITREE_LEGGED_SDK::RL_] > contact_threshold_;
+  contact_state_[LegPrefix::RR] = low_state_.footForce[UNITREE_LEGGED_SDK::RR_] > contact_threshold_;
 
   // Set feedforward and velocity cmd to zero to avoid for saft when not controller setCommand
   std::vector<std::string> names = hybrid_joint_interface_.getNames();
@@ -82,7 +75,6 @@ void UnitreeHW::write(const ros::Time& time, const ros::Duration& period)
     low_cmd_.motorCmd[i].Kd = joint_data_[i].kd_;
     low_cmd_.motorCmd[i].tau = joint_data_[i].ff_;
   }
-
   safety_->PositionLimit(low_cmd_);
   udp_->SetSend(low_cmd_);
   udp_->Send();
