@@ -13,9 +13,8 @@ add_definitions(-Wall -Werror)
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
-        roslint
         cheetah_basic_controllers
-        qpoases_vendor
+        qpoases_catkin
         )
 
 find_package(PkgConfig REQUIRED)
@@ -32,9 +31,8 @@ catkin_package(
         ${PROJECT_NAME}
         CATKIN_DEPENDS
         roscpp
-        roslint
         cheetah_basic_controllers
-        qpoases_vendor
+        qpoases_catkin
 )
 
 ###########
@@ -53,7 +51,6 @@ include_directories(
         include
         ${catkin_INCLUDE_DIRS}
         ${pinocchio_INCLUDE_DIRS}
-        ${qpoases_vendor_INCLUDE_DIRS}/qpoases_vendor
 )
 
 link_directories(
@@ -74,7 +71,6 @@ add_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
         ${pinocchio_LIBRARIES}
-        ${qpoases_vendor_LIBRARIES}
         )
 
 target_compile_options(${PROJECT_NAME} PUBLIC ${FLAGS})
@@ -90,5 +86,3 @@ target_link_libraries(mpc_solver_test
         ${catkin_LIBRARIES}
         ${PROJECT_NAME}
         )
-
-roslint_cpp()

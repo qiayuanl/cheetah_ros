@@ -11,10 +11,9 @@
     <buildtool_depend>catkin</buildtool_depend>
     <!-- depend: build, export, and execution dependency -->
     <depend>roscpp</depend>
-    <depend>roslint</depend>
     <depend>controller_interface</depend>
     <depend>cheetah_basic_controllers</depend>
-    <depend>qpoases_vendor</depend>
+    <depend>qpoases_catkin</depend>
 
     <exec_depend>controller_manager</exec_depend>
 
