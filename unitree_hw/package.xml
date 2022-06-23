@@ -13,8 +13,6 @@
     <!-- build_depend: dependencies only used in source files -->
     <!-- depend: build, export, and execution dependency -->
     <depend>roscpp</depend>
-    <depend>roslint</depend>
-
     <depend>cheetah_common</depend>
     <depend>cheetah_msgs</depend>
     <depend>hardware_interface</depend>

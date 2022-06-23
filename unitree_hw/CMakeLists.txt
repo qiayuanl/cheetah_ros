@@ -12,8 +12,6 @@ add_definitions(-Wall -Werror -Wno-inconsistent-missing-override)
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
-        roslint
-
         cheetah_common
         cheetah_msgs
         hardware_interface
@@ -39,8 +37,6 @@ catkin_package(
         ${PROJECT_NAME}_loader_plugins
         CATKIN_DEPENDS
         roscpp
-        roslint
-
         cheetah_common
         cheetah_msgs
         hardware_interface
@@ -96,13 +92,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         )
 
 # Mark other files for installation
-install(DIRECTORY config launch
+install(DIRECTORY config launch lib
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
-
-
-##########################
-## Static code analysis ##
-##########################
-
-roslint_cpp()
