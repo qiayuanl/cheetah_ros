@@ -1,4 +1,4 @@
-**THIS README IS CURRENTLY OUT OF DATE.**
+**This repo is archived. For the latest work about legged robot control, please refer to the [legged_control](https://github.com/qiayuanliao/legged_control).**
 
 # cheetah_ros
 
